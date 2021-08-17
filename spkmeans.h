@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -18,6 +17,7 @@ double** jacobi_calculations(double** lp_matrix, int row,
 double sos_off(double** lp_matrix, int row, int col);
 int is_convergence(double** lp_matrix, double** lp_matrix_tag, 
                                             int row, int col, int first_iter);
+int is_diagonal(double** matrix, int row, int col);
 double** matrix_multiplication(double** matrix1,
                                double** matrix2, int row, int col);
 double** three_matrix_multiplication(double** matrix1,
@@ -32,21 +32,4 @@ void ddg_goal(double** points, int row, int col);
 void lnorm_goal(double** points, int row, int col);
 void jacobi_goal(double** sym_matrix, int row, int col);
 double* s_c_t_calculation(double** lp_matrix, int row, int col);
-=======
 
-double **zero_matrix(int row, int col);
-void print_matrix(double **matrix, int row, int col);
-double **identity_matrix(int row, int col);
-double **transpose_matrix(double **matrix, int row, int col);
-double **adjacency_matrix(double **points, int row, int col);
-double **diagonal_degree_matrix(double **adj_matrix, int row, int col);
-double **Jacobi(double **points, int row, int col);
-double **matrix_multiplication(double **matrix1,
-                               double **matrix2, int row, int col);
-double sos_off(double **lp_matrix, int row, int col);
-int is_convergence(double **lp_matrix, double **lp_matrix_tag, int row,
-                   int col);
-void manipulated_diagonal(double **dig_matrix, int row);
-void matrix_substraction(double **matrix1, double **matrix2, int row, int col);
-void free_memory(double **matrix, int row);
->>>>>>> 323a59e870b9d74176299ac4d11951bd1022eaa9
