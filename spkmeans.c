@@ -2,44 +2,74 @@
 
 int main(int argc, char const *argv[])
 {
-    double **res;
-    double **res2;
-    double ***result;
+    FILE* file;
+    int num_of_points = 0;
+    int first_point = 1;
+    int i = 0;
+    int dimension = 1;
+    file = fopen(argv[3], "r");
+    assert(file != NULL && "An Error Has Occured");
+    /*we have a limit of 10 features, 9 commas, 
+    and each number has max of 4 digits before decimal point and after it*/
+    char* str_point = (char*) calloc(99, sizeof(char*));
+    double** data_points = (double**) calloc(1000, sizeof(double*));
 
-    double* sorted;
-
-    res = zero_matrix(3, 3);
-    res2 = zero_matrix(3, 3);
-    res[0][0] = 3;
-    res[0][1] = 2;
-    res[0][2] = 4;
-    res[1][0] = 2;
-    res[1][1] = 0;
-    res[1][2] = 2;
-    res[2][0] = 4;
-    res[2][1] = 2;
-    res[2][2] = 3;
-
-    res2[0][0] = 1;
-    res2[0][1] = 2;
-    res2[0][2] = 3;
-    res2[1][0] = 4;
-    res2[1][1] = 5;
-    res2[1][2] = 6;
-    res2[2][0] = 7;
-    res2[2][1] = 8;
-    res2[2][2] = 9;
-
-    sorted = (double*) calloc(6, sizeof(double));
-    for (int i = 0; i < 6; i++)
+    while (fgets(str_point, 99, file) != EOF)
     {
-        sorted[i] = 6-i;
+        if(first_point == 1){
+            for (i = 0; i < 99; i++)
+            {
+                if(str_point[i] == ','){
+                    dimension++;
+                }
+            } 
+        }
+        double* point = str_to_double();
+        data_points[num_of_points] = point;
+        first_point = 0;
     }
+    
+    num_of_points++;
 
-    for (int i = 0; i < 6; i++)
-    {
-        printf("%lf", sorted[i]);
-    }
+
+    // double **res;
+    // double **res2;
+    // double ***result;
+
+    // double* sorted;
+
+    // res = zero_matrix(3, 3);
+    // res2 = zero_matrix(3, 3);
+    // res[0][0] = 3;
+    // res[0][1] = 2;
+    // res[0][2] = 4;
+    // res[1][0] = 2;
+    // res[1][1] = 0;
+    // res[1][2] = 2;
+    // res[2][0] = 4;
+    // res[2][1] = 2;
+    // res[2][2] = 3;
+
+    // res2[0][0] = 1;
+    // res2[0][1] = 2;
+    // res2[0][2] = 3;
+    // res2[1][0] = 4;
+    // res2[1][1] = 5;
+    // res2[1][2] = 6;
+    // res2[2][0] = 7;
+    // res2[2][1] = 8;
+    // res2[2][2] = 9;
+
+    // sorted = (double*) calloc(6, sizeof(double));
+    // for (int i = 0; i < 6; i++)
+    // {
+    //     sorted[i] = 6-i;
+    // }
+
+    // for (int i = 0; i < 6; i++)
+    // {
+    //     printf("%lf", sorted[i]);
+    // }
 
 
     // jacobi_goal(res,3,3);
@@ -203,7 +233,7 @@ double*** jacobi(double** lp_matrix, int row, int col)
     double*** result;
     int cnt = 0;
     int first_iter = 1;
-    int is_diag = 0;
+    int converged = 0;
 
     /*in order to avoid free function on a pointer that has'nt been
     defined yet, we define tmp_matrix2*/
@@ -214,8 +244,7 @@ double*** jacobi(double** lp_matrix, int row, int col)
     The algorithm will stop after 100 iterations or if there is a convergence,
     whatever happens first
     */
-    while (cnt != 100 && is_convergence(tmp_matrix2, lp_matrix_tag, 
-                        row, col, first_iter) == 0 && is_diag == 0)
+    while (cnt != 100 && converged == 0)
     {
         rotate_matrix = rotation_matrix(lp_matrix, row, col);
         sct_vals = s_c_t_calculation(lp_matrix, row, col);
@@ -231,8 +260,9 @@ double*** jacobi(double** lp_matrix, int row, int col)
         free_memory(tmp_matrix, row);
         free_memory(tmp_matrix2, row);
         
-        if (is_diagonal(lp_matrix_tag, row, col) == 1) {
-            is_diag = 1;
+        if (is_convergence(tmp_matrix2, lp_matrix_tag, 
+                        row, col, first_iter) == 1) {
+            converged = 1;
         }
         else {
             tmp_matrix2 = lp_matrix;
@@ -395,19 +425,8 @@ int is_convergence(double** lp_matrix, double** lp_matrix_tag, int row,
     double sos_lp = sos_off(lp_matrix, row, col);
     double sos_lp_tag = sos_off(lp_matrix_tag, row, col);
 
-    if (sos_lp - sos_lp_tag <= 0.001)
+    if (sos_lp - sos_lp_tag <= 0.001 || (sos_lp_tag == 0.0))
     {
-        return 1;
-    }
-    return 0;
-}
-
-/*checks if the given matrix is diagonal by calculating 
-the matrix's sum of square off diagonal*/
-int is_diagonal(double** matrix, int row, int col)
-{
-    double matrix_sos = sos_off(matrix, row, col);
-    if(matrix_sos == 0.0){
         return 1;
     }
     return 0;

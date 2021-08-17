@@ -17,7 +17,6 @@ double** jacobi_calculations(double** lp_matrix, int row,
 double sos_off(double** lp_matrix, int row, int col);
 int is_convergence(double** lp_matrix, double** lp_matrix_tag, 
                                             int row, int col, int first_iter);
-int is_diagonal(double** matrix, int row, int col);
 double** matrix_multiplication(double** matrix1,
                                double** matrix2, int row, int col);
 double** three_matrix_multiplication(double** matrix1,
