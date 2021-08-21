@@ -1,4 +1,5 @@
 #include "spkmeans.h"
+#include "spkmeansmodule.c"
 
 int main(int argc, char const *argv[])
 {
@@ -7,79 +8,155 @@ int main(int argc, char const *argv[])
     int first_point = 1;
     int i = 0;
     int dimension = 1;
+    char* token;
+    double result;
+    int dimension_cnt = 0;
     file = fopen(argv[3], "r");
-    assert(file != NULL && "An Error Has Occured");
-    /*we have a limit of 10 features, 9 commas, 
+    assert(file != NULL && "An Error Has Occurred");
+    /*we have a limit of 10 features, 9 commas,
     and each number has max of 4 digits before decimal point and after it*/
-    char* str_point = (char*) calloc(99, sizeof(char*));
-    double** data_points = (double**) calloc(1000, sizeof(double*));
+    char* str_point = (char *)calloc(109, sizeof(char));
+    assert(str_point != NULL && "An Error Has Occurred");
+    double** data_points = (double **)calloc(1000, sizeof(double *));
+    assert(data_points != NULL && "An Error Has Occurred");
 
-    while (fgets(str_point, 99, file) != EOF)
+    while (fgets(str_point, 109, file) != NULL)
     {
-        if(first_point == 1){
-            for (i = 0; i < 99; i++)
+        if (first_point == 1)
+        {
+            for (i = 0; i < 109; i++)
             {
-                if(str_point[i] == ','){
+                /*calculating the dimension*/
+                if (str_point[i] == ',')
+                {
                     dimension++;
                 }
-            } 
+            }
+            /*memory for the points*/
+            for (i = 0; i < 1000; i++)
+            {
+                double* point = (double*)malloc(dimension * sizeof(double));
+                assert(point != NULL && "An Error Has Occurred");
+                data_points[i] = point;
+            }
         }
-        double* point = str_to_double();
-        data_points[num_of_points] = point;
+        token = strtok(str_point, ",");
+
+        /* walk through other tokens */
+        while (token != NULL)
+        {
+            result = strtod(token, NULL);
+            data_points[num_of_points][dimension_cnt] = result;
+            dimension_cnt++;
+            token = strtok(NULL, ",");
+        }
+        dimension_cnt = 0;
         first_point = 0;
+        num_of_points++;
     }
+    fclose(file);
+    data_points = (double**)realloc(data_points, (num_of_points - 1) * sizeof(double *));
     
-    num_of_points++;
+    /*
+    double **res;
+    double **res2;
+    double ***result;
 
+    double* sorted;
 
-    // double **res;
-    // double **res2;
-    // double ***result;
+    res = zero_matrix(3, 3);
+    res2 = zero_matrix(3, 3);
+    res[0][0] = 3;
+    res[0][1] = 2;
+    res[0][2] = 4;
+    res[1][0] = 2;
+    res[1][1] = 0;
+    res[1][2] = 2;
+    res[2][0] = 4;
+    res[2][1] = 2;
+    res[2][2] = 3;
 
-    // double* sorted;
+    res2[0][0] = 1;
+    res2[0][1] = 2;
+    res2[0][2] = 3;
+    res2[1][0] = 4;
+    res2[1][1] = 5;
+    res2[1][2] = 6;
+    res2[2][0] = 7;
+    res2[2][1] = 8;
+    res2[2][2] = 9;
+    
+    Eigenvector *A = jacobi(res, 3, 3);
 
-    // res = zero_matrix(3, 3);
-    // res2 = zero_matrix(3, 3);
-    // res[0][0] = 3;
-    // res[0][1] = 2;
-    // res[0][2] = 4;
-    // res[1][0] = 2;
-    // res[1][1] = 0;
-    // res[1][2] = 2;
-    // res[2][0] = 4;
-    // res[2][1] = 2;
-    // res[2][2] = 3;
+    A[0].value = 100;
+    A[1].value = 2;
+    A[2].value = 1;
 
-    // res2[0][0] = 1;
-    // res2[0][1] = 2;
-    // res2[0][2] = 3;
-    // res2[1][0] = 4;
-    // res2[1][1] = 5;
-    // res2[1][2] = 6;
-    // res2[2][0] = 7;
-    // res2[2][1] = 8;
-    // res2[2][2] = 9;
+    for (int i = 0; i < 3; i++)
+    {
+        printf("%lf\n", A[i].value);
+        for (int j = 0; j < 3; j++)
+        {
+            printf("%lf,", A[i].vector[j]);
+        }
+        printf("\n");
+    }
 
-    // sorted = (double*) calloc(6, sizeof(double));
-    // for (int i = 0; i < 6; i++)
-    // {
-    //     sorted[i] = 6-i;
-    // }
+    merge_sort(A, 0, 3);
 
-    // for (int i = 0; i < 6; i++)
-    // {
-    //     printf("%lf", sorted[i]);
-    // }
+    for (int i = 0; i < 3; i++)
+    {
+        printf("%lf\n", A[i].value);
+        for (int j = 0; j < 3; j++)
+        {
+            printf("%lf,", A[i].vector[j]);
+        }
+        printf("\n");
+    }
+    */
 
-
-    // jacobi_goal(res,3,3);
-    // print_matrix(result[0], 3, 3);
-    // printf("\n");
-    // print_matrix(result[1], 3, 3);
-    // print_matrix(result[0], 3,3);
-    // printf("\n");
-    // print_matrix(result[1],3,3);
     return 0;
+}
+
+double* str_to_double(char* str_point, int dimension)
+{
+    double* point = (double*)malloc(dimension * sizeof(double));
+    assert(point != NULL && "An Error Has Occured");
+    printf("%p", point);
+    char* cordinate = (char*)calloc(11, sizeof(char));
+    assert(cordinate != NULL && "An Error Has Occured");
+
+    int i_cord = 0;
+    int i_dim = 0;
+    int i = 0;
+    double result;
+    for (i = 0; i < 99; i++)
+    {
+        /*we reached to the end of the number*/
+
+        if (str_point[i] == ',' || str_point[i] == '\0')
+        {
+            cordinate[i_cord] = '\0';
+            i_cord = 0;
+            /*converting a cordinate as a string to double*/
+            result = strtod(cordinate, NULL);
+            /*puts the cordinate in the point array*/
+            point[i_dim] = result;
+            i_dim++;
+            if (str_point[i] == '\0')
+            {
+                break;
+            }
+        }
+        else
+        {
+            /*copy the number as a string to a small array*/
+            cordinate[i_cord] = str_point[i];
+            i_cord++;
+        }
+    }
+    free(cordinate);
+    return point;
 }
 
 void wam_goal(double** points, int num_of_points, int dimension)
@@ -106,28 +183,31 @@ void lnorm_goal(double** points, int row, int col)
     free_memory(result, row);
 }
 
-void jacobi_goal(double** sym_matrix, int row, int col)
+void jacobi_goal(double **sym_matrix, int row, int col)
 {
-    double*** result;
-    double** trans_eigenvectors;
+    Eigenvector* result;
     int i;
 
     result = jacobi(sym_matrix, row, col);
     for (i = 0; i < row; i++)
     {
-        if(i == row-1){
-            printf("%.4f", result[1][i][i]);
-        }else{
-            printf("%.4f,", result[1][i][i]);
-            }
+        if (i == row - 1)
+        {
+            printf("%.4f", result[i].value);
+        }
+        else
+        {
+            printf("%.4f,", result[i].value);
+        }
     }
     printf("\n");
 
-    trans_eigenvectors = transpose_matrix(result[0], row, col);
-    print_matrix(trans_eigenvectors, row, col);
-    free_memory(result[1], row);
-    free_memory(result[0], row);
-    free_memory(trans_eigenvectors, row);
+    for (i = 0; i < row; i++)
+    {
+        print_array(result[i].vector, row);
+        free(result[i].vector);
+        printf("\n");
+    }
     free(result);
 }
 
@@ -222,7 +302,7 @@ double** normalized_graph_laplacian(double** points, int row, int col)
 /*
 The jacobi eigenvalue algorithm
 */
-double*** jacobi(double** lp_matrix, int row, int col)
+Eigenvector* jacobi(double** lp_matrix, int row, int col)
 {
     double** lp_matrix_tag;
     double** eigenvectors_matrix;
@@ -230,7 +310,7 @@ double*** jacobi(double** lp_matrix, int row, int col)
     double** tmp_matrix2;
     double** rotate_matrix;
     double* sct_vals;
-    double*** result;
+    Eigenvector *result;
     int cnt = 0;
     int first_iter = 1;
     int converged = 0;
@@ -253,18 +333,20 @@ double*** jacobi(double** lp_matrix, int row, int col)
         /*points to the last updated eigenvectors matrix*/
         tmp_matrix = eigenvectors_matrix;
 
-       /*eigenvectors_matrix will now point to a new updated eigenvectors matrix*/
+        /*eigenvectors_matrix will now point to a new updated eigenvectors matrix*/
         eigenvectors_matrix = matrix_multiplication(tmp_matrix, rotate_matrix, row, col);
 
         /*release tmp_matrix and tmp_matrix2*/
         free_memory(tmp_matrix, row);
         free_memory(tmp_matrix2, row);
-        
-        if (is_convergence(tmp_matrix2, lp_matrix_tag, 
-                        row, col, first_iter) == 1) {
+
+        if (is_convergence(tmp_matrix2, lp_matrix_tag,
+                           row, col, first_iter) == 1)
+        {
             converged = 1;
         }
-        else {
+        else
+        {
             tmp_matrix2 = lp_matrix;
             lp_matrix = lp_matrix_tag;
         }
@@ -277,10 +359,58 @@ double*** jacobi(double** lp_matrix, int row, int col)
     free(sct_vals);
 
     /*returns an array with two matrixes - eigenvectors and eigenvalues */
-    result = (double***)calloc(2,sizeof(double**));
-    result[0] = eigenvectors_matrix;
-    result[1] = lp_matrix_tag;
+    result = creating_eigenvector_array(eigenvectors_matrix, lp_matrix_tag, row);
+    free_memory(eigenvectors_matrix, row);
+    free_memory(lp_matrix_tag, row);
+
     return result;
+}
+
+/*
+creating an array of eigenvector structs
+*/
+Eigenvector* creating_eigenvector_array(double** eigenvectors_matrix, 
+                                    double** eigenvalues_matrix, int row)
+{
+    Eigenvector* result = (Eigenvector*)malloc(row * (sizeof(struct Eigenvector)));
+    assert(result != NULL && "An Error Has Occured");
+    int i = 0;
+    int m = 0;
+    for (i = 0; i < row; i++)
+    {
+        Eigenvector tmp_struct;
+        tmp_struct.value = eigenvalues_matrix[i][i];
+        tmp_struct.vector = (double*)malloc(row * sizeof(double));
+        assert(tmp_struct.vector != NULL && "An Error Has Occured");
+        for (m = 0; m < row; m++)
+        {
+            tmp_struct.vector[m] = eigenvectors_matrix[m][i];
+        }
+        result[i] = tmp_struct;
+    }
+    return result;
+}
+
+/*
+In order to determine the number of clusters k, we will use eigengap heuristic
+*/
+int eigengap_heuristic(Eigenvector* eigenvector, int row)
+{
+    double max = 0;
+    int i = 0;
+    int index = 0;
+    int lim = row / 2;
+    /*sorting the eigenvector structs by comparing the eigenvalues*/
+    merge_sort(eigenvector, 0, row);
+    for (i = 0; i < lim - 1; i++)
+    {
+        if (fabs(eigenvector[i].value - eigenvector[i + 1].value) > max)
+        {
+            max = fabs(eigenvector[i].value - eigenvector[i + 1].value);
+            index = i;
+        }
+    }
+    return index;
 }
 
 /*
@@ -346,8 +476,8 @@ double** jacobi_calculations(double** lp_matrix, int row,
     double** A_tag = zero_matrix(row, col);
     int n = 0;
     int m = 0;
-    int i = sct_vals[3];
-    int j = sct_vals[4];
+    int i = (int) sct_vals[3];
+    int j = (int) sct_vals[4];
     double c = sct_vals[1];
     double s = sct_vals[0];
     /*
@@ -491,7 +621,6 @@ creating a rowxcol identity matrix
 double** identity_matrix(int row, int col)
 {
     int i = 0;
-    int j = 0;
     double** result;
     result = (double**)calloc(row, sizeof(double*));
     assert(result != NULL && "An Error Has Occured");
@@ -510,26 +639,6 @@ double** identity_matrix(int row, int col)
         result[i][i] = 1;
     }
 
-    return result;
-}
-
-/*
-recieve a matrix and make a new transposed one
-*/
-double** transpose_matrix(double** matrix, int row, int col)
-{
-    double** result;
-    int i = 0;
-    int j = 0;
-
-    result = zero_matrix(row, col);
-    for (i = 0; i < row; i++)
-    {
-        for (j = 0; j < col; j++)
-        {
-            result[i][j] = matrix[j][i];
-        }
-    }
     return result;
 }
 
@@ -619,6 +728,22 @@ void print_matrix(double** matrix, int row, int col)
     }
 }
 
+void print_array(double* array, int row)
+{
+    int i = 0;
+    for (i = 0; i < row; i++)
+    {
+        if (i == row - 1)
+        {
+            printf("%.4f", array[i]);
+        }
+        else
+        {
+            printf("%.4f,", array[i]);
+        }
+    }
+}
+
 /*
 gets a list of lists (could be matrix or list of points)
 free the inner lists and then the outer one
@@ -631,4 +756,112 @@ void free_memory(double** matrix, int row)
         free(matrix[i]);
     }
     free(matrix);
+}
+
+/*https://www.geeksforgeeks.org/merge-sort/*/
+// Merges two subarrays of arr[].
+// First subarray is arr[l..m]
+// Second subarray is arr[m+1..r]
+void merge(Eigenvector* eigenvector, int l, int m, int r)
+{
+    int i, j, k;
+    int n1 = m - l + 1;
+    int n2 = r - m;
+    printf("n1: %d\n", n1);
+    printf("n2: %d\n", n2);
+    printf("l: %d\n", l);
+    printf("m: %d\n", m);
+    printf("r: %d\n", r);
+
+    /* create temp arrays */
+    Eigenvector* L = (Eigenvector*)malloc(n1 * sizeof(struct Eigenvector));
+    Eigenvector* R = (Eigenvector*)malloc(n2 * sizeof(struct Eigenvector));
+
+    /* Copy data to temp arrays L[] and R[] */
+    for (i = 0; i < n1; i++)
+        L[i] = eigenvector[l + i];
+    for (j = 0; j < n2; j++)
+        R[j] = eigenvector[m + 1 + j];
+
+    /* Merge the temp arrays back into arr[l..r]*/
+    i = 0; // Initial index of first subarray
+    j = 0; // Initial index of second subarray
+    k = l; // Initial index of merged subarray
+    while (i < n1 && j < n2)
+    {
+        if (L[i].value <= R[j].value)
+        {
+            eigenvector[k] = L[i];
+            i++;
+        }
+        else
+        {
+            eigenvector[k] = R[j];
+            j++;
+        }
+        k++;
+    }
+
+    /* Copy the remaining elements of L[], if there
+    are any */
+    while (i < n1)
+    {
+        eigenvector[k] = L[i];
+        i++;
+        k++;
+    }
+
+    /* Copy the remaining elements of R[], if there
+    are any */
+    while (j < n2)
+    {
+        eigenvector[k] = R[j];
+        j++;
+        k++;
+    }
+}
+
+/* l is for left index and r is right index of the
+sub-array of arr to be sorted */
+void merge_sort(Eigenvector* eigenvector, int l, int r)
+{
+    if (l < r)
+    {
+        // Same as (l+r)/2, but avoids overflow for
+        // large l and h
+        int m = l + (r - l) / 2;
+        printf("m: %d\n", m);
+        printf("l: %d\n", l);
+        printf("r: %d\n", r);
+        // Sort first and second halves
+        merge_sort(eigenvector, l, m);
+        merge_sort(eigenvector, m + 1, r);
+        
+        merge(eigenvector, l, m, r);
+    }
+}
+
+
+/*
+converting all data points from python into data points in C
+*/
+double** convert_python_to_c(PyObject* data_points_p, int dimension, int num_of_points)
+{
+    int cnt = 0;
+    int i = 0;
+    int j = 0;
+    double** data_points = (double**)calloc(num_of_points, sizeof(*data_points));
+    assert(data_points != NULL && "An Error Has Occured");
+
+    for (i = 0; i < num_of_points; i++)
+    {
+        data_points[i] = (double *)calloc(dimension, sizeof(*data_points[i]));
+        assert(data_points[i] != NULL && "An Error Has Occured");
+        for (j = 0; j < dimension; j++)
+        {
+            data_points[i][j] = PyFloat_AsDouble(PyList_GetItem(data_points_p, cnt));
+            cnt++;
+        }
+    }
+    return data_points;
 }
