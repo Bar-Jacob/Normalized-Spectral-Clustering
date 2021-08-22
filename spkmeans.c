@@ -1,80 +1,82 @@
 #include "spkmeans.h"
-#include "spkmeansmodule.c"
 
 int main(int argc, char const *argv[])
 {
-    FILE* file;
-    int num_of_points = 0;
-    int first_point = 1;
-    int i = 0;
-    int dimension = 1;
-    char* token;
-    double result;
-    int dimension_cnt = 0;
-    file = fopen(argv[3], "r");
-    assert(file != NULL && "An Error Has Occurred");
-    /*we have a limit of 10 features, 9 commas,
-    and each number has max of 4 digits before decimal point and after it*/
-    char* str_point = (char *)calloc(109, sizeof(char));
-    assert(str_point != NULL && "An Error Has Occurred");
-    double** data_points = (double **)calloc(1000, sizeof(double *));
-    assert(data_points != NULL && "An Error Has Occurred");
+    // FILE* file;
+    // int num_of_points = 0;
+    // int first_point = 1;
+    // int i = 0;
+    // int dimension = 1;
+    // char* token;
+    // double result;
+    // int dimension_cnt = 0;
+    // file = fopen(argv[3], "r");
+    // assert(file != NULL && "An Error Has Occurred");
+    // /*we have a limit of 10 features, 9 commas,
+    // and each number has max of 4 digits before decimal point and after it*/
+    // char* str_point = (char *)calloc(109, sizeof(char));
+    // assert(str_point != NULL && "An Error Has Occurred");
+    // double** data_points = (double **)calloc(1000, sizeof(double *));
+    // assert(data_points != NULL && "An Error Has Occurred");
 
-    while (fgets(str_point, 109, file) != NULL)
-    {
-        if (first_point == 1)
-        {
-            for (i = 0; i < 109; i++)
-            {
-                /*calculating the dimension*/
-                if (str_point[i] == ',')
-                {
-                    dimension++;
-                }
-            }
-            /*memory for the points*/
-            for (i = 0; i < 1000; i++)
-            {
-                double* point = (double*)malloc(dimension * sizeof(double));
-                assert(point != NULL && "An Error Has Occurred");
-                data_points[i] = point;
-            }
-        }
-        token = strtok(str_point, ",");
+    // while (fgets(str_point, 109, file) != NULL)
+    // {
+    //     if (first_point == 1)
+    //     {
+    //         for (i = 0; i < 109; i++)
+    //         {
+    //             /*calculating the dimension*/
+    //             if (str_point[i] == ',')
+    //             {
+    //                 dimension++;
+    //             }
+    //         }
+    //         /*memory for the points*/
+    //         for (i = 0; i < 1000; i++)
+    //         {
+    //             double* point = (double*)malloc(dimension * sizeof(double));
+    //             assert(point != NULL && "An Error Has Occurred");
+    //             data_points[i] = point;
+    //         }
+    //     }
+    //     token = strtok(str_point, ",");
 
-        /* walk through other tokens */
-        while (token != NULL)
-        {
-            result = strtod(token, NULL);
-            data_points[num_of_points][dimension_cnt] = result;
-            dimension_cnt++;
-            token = strtok(NULL, ",");
-        }
-        dimension_cnt = 0;
-        first_point = 0;
-        num_of_points++;
-    }
-    fclose(file);
-    data_points = (double**)realloc(data_points, (num_of_points - 1) * sizeof(double *));
+    //     /* walk through other tokens */
+    //     while (token != NULL)
+    //     {
+    //         result = strtod(token, NULL);
+    //         data_points[num_of_points][dimension_cnt] = result;
+    //         dimension_cnt++;
+    //         token = strtok(NULL, ",");
+    //     }
+    //     dimension_cnt = 0;
+    //     first_point = 0;
+    //     num_of_points++;
+    // }
+    // fclose(file);
+    // data_points = (double**)realloc(data_points, (num_of_points - 1) * sizeof(double *));
     
-    /*
+    
     double **res;
     double **res2;
     double ***result;
 
     double* sorted;
 
-    res = zero_matrix(3, 3);
+    res = zero_matrix(4, 4);
     res2 = zero_matrix(3, 3);
     res[0][0] = 3;
     res[0][1] = 2;
     res[0][2] = 4;
+    res[0][3] = 4;
     res[1][0] = 2;
     res[1][1] = 0;
     res[1][2] = 2;
+    res[1][3] = 2;
     res[2][0] = 4;
     res[2][1] = 2;
     res[2][2] = 3;
+    res[2][3] = 3;
 
     res2[0][0] = 1;
     res2[0][1] = 2;
@@ -90,7 +92,7 @@ int main(int argc, char const *argv[])
 
     A[0].value = 100;
     A[1].value = 2;
-    A[2].value = 1;
+    A[2].value = 100;
 
     for (int i = 0; i < 3; i++)
     {
@@ -102,7 +104,7 @@ int main(int argc, char const *argv[])
         printf("\n");
     }
 
-    merge_sort(A, 0, 3);
+    merge_sort(A, 0, 2);
 
     for (int i = 0; i < 3; i++)
     {
@@ -113,7 +115,6 @@ int main(int argc, char const *argv[])
         }
         printf("\n");
     }
-    */
 
     return 0;
 }
@@ -762,20 +763,11 @@ void free_memory(double** matrix, int row)
 // Merges two subarrays of arr[].
 // First subarray is arr[l..m]
 // Second subarray is arr[m+1..r]
-void merge(Eigenvector* eigenvector, int l, int m, int r)
+void merge(Eigenvector* eigenvector, Eigenvector* R, Eigenvector* L, int l, int m, int r)
 {
     int i, j, k;
     int n1 = m - l + 1;
     int n2 = r - m;
-    printf("n1: %d\n", n1);
-    printf("n2: %d\n", n2);
-    printf("l: %d\n", l);
-    printf("m: %d\n", m);
-    printf("r: %d\n", r);
-
-    /* create temp arrays */
-    Eigenvector* L = (Eigenvector*)malloc(n1 * sizeof(struct Eigenvector));
-    Eigenvector* R = (Eigenvector*)malloc(n2 * sizeof(struct Eigenvector));
 
     /* Copy data to temp arrays L[] and R[] */
     for (i = 0; i < n1; i++)
@@ -830,14 +822,21 @@ void merge_sort(Eigenvector* eigenvector, int l, int r)
         // Same as (l+r)/2, but avoids overflow for
         // large l and h
         int m = l + (r - l) / 2;
-        printf("m: %d\n", m);
-        printf("l: %d\n", l);
-        printf("r: %d\n", r);
+        int n1 = m - l + 1;
+        int n2 = r - m;
+
+        /* create temp arrays */
+        Eigenvector* L = (Eigenvector*)malloc(n1 * sizeof(struct Eigenvector));
+        Eigenvector* R = (Eigenvector*)malloc(n2 * sizeof(struct Eigenvector));
+
         // Sort first and second halves
         merge_sort(eigenvector, l, m);
         merge_sort(eigenvector, m + 1, r);
-        
-        merge(eigenvector, l, m, r);
+
+        merge(eigenvector, R, L, l, m, r);
+
+        free(L);
+        free(R);
     }
 }
 
@@ -845,23 +844,23 @@ void merge_sort(Eigenvector* eigenvector, int l, int r)
 /*
 converting all data points from python into data points in C
 */
-double** convert_python_to_c(PyObject* data_points_p, int dimension, int num_of_points)
-{
-    int cnt = 0;
-    int i = 0;
-    int j = 0;
-    double** data_points = (double**)calloc(num_of_points, sizeof(*data_points));
-    assert(data_points != NULL && "An Error Has Occured");
+// double** convert_python_to_c(PyObject* data_points_p, int dimension, int num_of_points)
+// {
+//     int cnt = 0;
+//     int i = 0;
+//     int j = 0;
+//     double** data_points = (double**)calloc(num_of_points, sizeof(*data_points));
+//     assert(data_points != NULL && "An Error Has Occured");
 
-    for (i = 0; i < num_of_points; i++)
-    {
-        data_points[i] = (double *)calloc(dimension, sizeof(*data_points[i]));
-        assert(data_points[i] != NULL && "An Error Has Occured");
-        for (j = 0; j < dimension; j++)
-        {
-            data_points[i][j] = PyFloat_AsDouble(PyList_GetItem(data_points_p, cnt));
-            cnt++;
-        }
-    }
-    return data_points;
-}
+//     for (i = 0; i < num_of_points; i++)
+//     {
+//         data_points[i] = (double *)calloc(dimension, sizeof(*data_points[i]));
+//         assert(data_points[i] != NULL && "An Error Has Occured");
+//         for (j = 0; j < dimension; j++)
+//         {
+//             data_points[i][j] = PyFloat_AsDouble(PyList_GetItem(data_points_p, cnt));
+//             cnt++;
+//         }
+//     }
+//     return data_points;
+// }

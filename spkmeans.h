@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <math.h>
-#include <Python.h>
+// #include <Python.h>
 
 typedef struct Eigenvector
 {
@@ -41,6 +41,6 @@ double* s_c_t_calculation(double** lp_matrix, int row, int col);
 double* str_to_double(char* str_point, int dimension);
 Eigenvector* creating_eigenvector_array(double** eigenvectors_matrix, double** eigenvalues_matrix, int row);
 void print_array(double* array, int row);
-void merge(Eigenvector* eigenvector, int l, int m, int r);
+void merge(Eigenvector* eigenvector, Eigenvector* R, Eigenvector* L, int l, int m, int r);
 void merge_sort(Eigenvector* eigenvector, int l, int r);
-double** convert_python_to_c(PyObject* data_points_p, int dimension_p, int num_of_points_p);
+// double** convert_python_to_c(PyObject* data_points_p, int dimension_p, int num_of_points_p);

@@ -1,4 +1,4 @@
-#include <Python.h>
+#include "spkmeans.h"
 
 static void fit_capi(PyObject *self, PyObject *args);
 
@@ -16,18 +16,22 @@ static void fit_capi(PyObject *self, PyObject *args)
     PyObject *data_points_p;
     printf("in fit\n");
 
+    printf("before first if");
     if (!(PyArg_ParseTuple(args, "isiiO", &k, &goal, &dimension_p, &num_of_points_p, &data_points_p)))
     {
         printf("before error in first if");
         printf("An Error Has Occured");
         exit(0);
     }
+
+    printf("before second if");
     if (!PyList_Check(data_points_p))
     {
         printf("before error in second if");
         printf("An Error Has Occured");
         exit(0);
     }
+    printf("before convert");
     data_points = convert_python_to_c(data_points_p, dimension_p, num_of_points_p);
     
     printf("before goals");
@@ -39,9 +43,11 @@ static void fit_capi(PyObject *self, PyObject *args)
     case 'd':
         ddg_goal(data_points, num_of_points_p, dimension_p);
         break;
+    /*
     case 'l':
         lnorm_goal(data_points, num_of_points_p, dimension_p);
         break;
+        */
     case 'j':
         printf("in jacobi goal");
         jacobi_goal(data_points, num_of_points_p, dimension_p);
