@@ -61,7 +61,7 @@ int main(int argc, char const *argv[])
     double **res2;
     double ***result;
 
-    double* sorted;
+
 
     res = zero_matrix(4, 4);
     res2 = zero_matrix(3, 3);
@@ -77,44 +77,11 @@ int main(int argc, char const *argv[])
     res[2][1] = 2;
     res[2][2] = 3;
     res[2][3] = 3;
+    res[3][0] = 2;
+    res[3][1] = 4;
+    res[3][2] = 7;
+    res[3][3] = 2;
 
-    res2[0][0] = 1;
-    res2[0][1] = 2;
-    res2[0][2] = 3;
-    res2[1][0] = 4;
-    res2[1][1] = 5;
-    res2[1][2] = 6;
-    res2[2][0] = 7;
-    res2[2][1] = 8;
-    res2[2][2] = 9;
-    
-    Eigenvector *A = jacobi(res, 3, 3);
-
-    A[0].value = 100;
-    A[1].value = 2;
-    A[2].value = 100;
-
-    for (int i = 0; i < 3; i++)
-    {
-        printf("%lf\n", A[i].value);
-        for (int j = 0; j < 3; j++)
-        {
-            printf("%lf,", A[i].vector[j]);
-        }
-        printf("\n");
-    }
-
-    merge_sort(A, 0, 2);
-
-    for (int i = 0; i < 3; i++)
-    {
-        printf("%lf\n", A[i].value);
-        for (int j = 0; j < 3; j++)
-        {
-            printf("%lf,", A[i].vector[j]);
-        }
-        printf("\n");
-    }
 
     return 0;
 }
@@ -212,7 +179,7 @@ void jacobi_goal(double **sym_matrix, int row, int col)
     free(result);
 }
 
-// void spk_goal()
+//void spk_goal()
 
 /*
 computing adjacency matrix
@@ -402,8 +369,8 @@ int eigengap_heuristic(Eigenvector* eigenvector, int row)
     int index = 0;
     int lim = row / 2;
     /*sorting the eigenvector structs by comparing the eigenvalues*/
-    merge_sort(eigenvector, 0, row);
-    for (i = 0; i < lim - 1; i++)
+    merge_sort(eigenvector, 0, row-1);
+    for (i = 0; i < lim; i++)
     {
         if (fabs(eigenvector[i].value - eigenvector[i + 1].value) > max)
         {

@@ -43,4 +43,5 @@ Eigenvector* creating_eigenvector_array(double** eigenvectors_matrix, double** e
 void print_array(double* array, int row);
 void merge(Eigenvector* eigenvector, Eigenvector* R, Eigenvector* L, int l, int m, int r);
 void merge_sort(Eigenvector* eigenvector, int l, int r);
+int eigengap_heuristic(Eigenvector* eigenvector, int row);
 // double** convert_python_to_c(PyObject* data_points_p, int dimension_p, int num_of_points_p);
