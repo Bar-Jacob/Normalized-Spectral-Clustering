@@ -1,88 +1,104 @@
 #include "spkmeans.h"
+#include "kmeans.c"
 
 int main(int argc, char const *argv[])
 {
-    // FILE* file;
-    // int num_of_points = 0;
-    // int first_point = 1;
-    // int i = 0;
-    // int dimension = 1;
-    // char* token;
-    // double result;
-    // int dimension_cnt = 0;
-    // file = fopen(argv[3], "r");
-    // assert(file != NULL && "An Error Has Occurred");
-    // /*we have a limit of 10 features, 9 commas,
-    // and each number has max of 4 digits before decimal point and after it*/
-    // char* str_point = (char *)calloc(109, sizeof(char));
-    // assert(str_point != NULL && "An Error Has Occurred");
-    // double** data_points = (double **)calloc(1000, sizeof(double *));
-    // assert(data_points != NULL && "An Error Has Occurred");
+    FILE* file;
+    int num_of_points = 0;
+    int first_point = 1;
+    int i = 0;
+    int dimension = 1;
+    char* token;
+    double result;
+    int dimension_cnt = 0;
+    int k = atoi(argv[1]);
+    char goal = (char) argv[2][0];
+    file = fopen(argv[3], "r");
+    assert(file != NULL && "An Error Has Occurred");
+    /*we have a limit of 10 features, 9 commas,
+    and each number has max of 4 digits before decimal point and after it*/
+    char* str_point = (char *)calloc(109, sizeof(char));
+    assert(str_point != NULL && "An Error Has Occurred");
+    double** data_points = (double **)calloc(1000, sizeof(double *));
+    assert(data_points != NULL && "An Error Has Occurred");
 
-    // while (fgets(str_point, 109, file) != NULL)
-    // {
-    //     if (first_point == 1)
-    //     {
-    //         for (i = 0; i < 109; i++)
-    //         {
-    //             /*calculating the dimension*/
-    //             if (str_point[i] == ',')
-    //             {
-    //                 dimension++;
-    //             }
-    //         }
-    //         /*memory for the points*/
-    //         for (i = 0; i < 1000; i++)
-    //         {
-    //             double* point = (double*)malloc(dimension * sizeof(double));
-    //             assert(point != NULL && "An Error Has Occurred");
-    //             data_points[i] = point;
-    //         }
-    //     }
-    //     token = strtok(str_point, ",");
+    while (fgets(str_point, 109, file) != NULL)
+    {
+        if (first_point == 1)
+        {
+            for (i = 0; i < 109; i++)
+            {
+                /*calculating the dimension*/
+                if (str_point[i] == ',')
+                {
+                    dimension++;
+                }
+            }
+            /*memory for the points*/
+            for (i = 0; i < 1000; i++)
+            {
+                double* point = (double*)malloc(dimension * sizeof(double));
+                assert(point != NULL && "An Error Has Occurred");
+                data_points[i] = point;
+            }
+        }
+        token = strtok(str_point, ",");
 
-    //     /* walk through other tokens */
-    //     while (token != NULL)
-    //     {
-    //         result = strtod(token, NULL);
-    //         data_points[num_of_points][dimension_cnt] = result;
-    //         dimension_cnt++;
-    //         token = strtok(NULL, ",");
-    //     }
-    //     dimension_cnt = 0;
-    //     first_point = 0;
-    //     num_of_points++;
-    // }
-    // fclose(file);
-    // data_points = (double**)realloc(data_points, (num_of_points - 1) * sizeof(double *));
+        /* walk through other tokens */
+        while (token != NULL)
+        {
+            result = strtod(token, NULL);
+            data_points[num_of_points][dimension_cnt] = result;
+            dimension_cnt++;
+            token = strtok(NULL, ",");
+        }
+        dimension_cnt = 0;
+        first_point = 0;
+        num_of_points++;
+    }
+    fclose(file);
+    data_points = (double**)realloc(data_points, (num_of_points - 1) * sizeof(double *));
     
+    switch (goal)
+    {
+    case 'w':
+        wam_goal(data_points, num_of_points, dimension);
+        break;
+    case 'd':
+        ddg_goal(data_points, num_of_points, dimension);
+        break;
+    case 'l':
+        lnorm_goal(data_points, num_of_points, dimension);
+        break;
+    case 'j':
+        jacobi_goal(data_points, num_of_points, dimension);
+        break;
+    case 's':
+        spk_goal(data_points, num_of_points, dimension, k);
+        break;
+    }
     
-    double **res;
-    double **res2;
-    double ***result;
-
-
-
-    res = zero_matrix(4, 4);
-    res2 = zero_matrix(3, 3);
-    res[0][0] = 3;
-    res[0][1] = 2;
-    res[0][2] = 4;
-    res[0][3] = 4;
-    res[1][0] = 2;
-    res[1][1] = 0;
-    res[1][2] = 2;
-    res[1][3] = 2;
-    res[2][0] = 4;
-    res[2][1] = 2;
-    res[2][2] = 3;
-    res[2][3] = 3;
-    res[3][0] = 2;
-    res[3][1] = 4;
-    res[3][2] = 7;
-    res[3][3] = 2;
-
-
+    // double **res;
+    // double **res2;
+    // res = zero_matrix(3, 3);
+    // res2 = zero_matrix(3, 3);
+    // res[0][0] = 3;
+    // res[0][1] = 2;
+    // res[0][2] = 4;
+    // // res[0][3] = 4;
+    // res[1][0] = 2;
+    // res[1][1] = 0;
+    // res[1][2] = 2;
+    // // res[1][3] = 2;
+    // res[2][0] = 4;
+    // res[2][1] = 2;
+    // res[2][2] = 3;
+    // // res[2][3] = 3;
+    // // res[3][0] = 2;
+    // // res[3][1] = 4;
+    // // res[3][2] = 7;
+    // // res[3][3] = 2;
+    // // Eigenvector* A = jacobi(res,3,3);
     return 0;
 }
 
@@ -151,7 +167,7 @@ void lnorm_goal(double** points, int row, int col)
     free_memory(result, row);
 }
 
-void jacobi_goal(double **sym_matrix, int row, int col)
+void jacobi_goal(double** sym_matrix, int row, int col)
 {
     Eigenvector* result;
     int i;
@@ -179,7 +195,72 @@ void jacobi_goal(double **sym_matrix, int row, int col)
     free(result);
 }
 
-//void spk_goal()
+void spk_goal(double** points, int row, int col, int k)
+{
+    printf("in spk_goal");
+    double** U;
+    printf("before lapl");
+    double** laplacian = normalized_graph_laplacian(points, row, col);
+    printf("after lapl");
+    Eigenvector* eignvectors = jacobi(laplacian, row, col);
+    printf("after jacobi");
+    printf("k: %d\n",k);
+    if(k == 0){
+        k = eigengap_heuristic(eignvectors, row);
+    }else{
+        printf("before merge");
+        merge_sort(eignvectors, 0, row-1);
+    }
+    printf("before U");
+    U = creating_U(eignvectors, k, row);
+    renormalizing_U(U, k, row);
+    printf("before kmeans");
+    kmeans(points, U, k, row, row);
+    printf("after kmeans");
+    free_memory(U, row);
+}
+
+/*takes the first k eignvectors (after being sorted by their values)
+put the k vectors as columns*/
+double** creating_U(Eigenvector* eignvector, int k, int row)
+{
+    double** U = zero_matrix(row, k);
+    int i = 0;
+    int j = 0;
+
+    for (i = 0; i < k; i++)
+    {
+        for (j = 0; j < row; j++)
+        {
+            U[j][i] = eignvector[i].vector[j];
+        }
+    }
+    return U;
+}
+
+/*renormalizing each of U’s rows to have unit length*/
+void renormalizing_U(double** U, int k, int row)
+{
+    int i = 0;
+    int j  = 0;
+    for (i = 0; i < row; i++)
+    {
+        /*computing sum of squares of each row*/
+        double sos_row = 0.0;
+        for (j = 0; j < k; j++)
+        {
+            sos_row += pow(U[i][j],2);
+        }
+        sos_row = sqrt(sos_row);
+
+        /*updating U[i][j] to be renormalized*/
+        for (j = 0; j < k; j++)
+        {
+            U[i][j] = U[i][j]/sos_row;
+        }
+    }
+     
+}
 
 /*
 computing adjacency matrix
@@ -248,15 +329,20 @@ double** normalized_graph_laplacian(double** points, int row, int col)
     double** result;
 
     adj_matrix = adjacency_matrix(points, row, col);
+    printf("after adj");
     diag_matrix = diagonal_degree_matrix(points, row, col);
+    printf("after diag");
     /*
     changes the matrix itself, since we give a pointer to the matrix 
     */
     manipulated_diagonal(diag_matrix, row);
+    printf("after mani");
     multip_matrix = three_matrix_multiplication(diag_matrix, adj_matrix,
                                                 diag_matrix, row, col);
+    printf("after multi");
     free_memory(adj_matrix, row);
     free_memory(diag_matrix, row);
+    printf("after 2 free");
     result = identity_matrix(row, col);
     /*
     changes the first matrix given, so the result will be on the result matrix
@@ -662,6 +748,7 @@ gets a diagonal matrix and raise each cell on the diagonal by the power of -0.5
 */
 void manipulated_diagonal(double** diag_matrix, int row)
 {
+    printf("row: %d", row);
     int i = 0;
     for (i = 0; i < row; i++)
     {

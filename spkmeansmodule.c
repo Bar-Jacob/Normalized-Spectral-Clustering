@@ -43,11 +43,9 @@ static void fit_capi(PyObject *self, PyObject *args)
     case 'd':
         ddg_goal(data_points, num_of_points_p, dimension_p);
         break;
-    /*
     case 'l':
         lnorm_goal(data_points, num_of_points_p, dimension_p);
         break;
-        */
     case 'j':
         printf("in jacobi goal");
         jacobi_goal(data_points, num_of_points_p, dimension_p);

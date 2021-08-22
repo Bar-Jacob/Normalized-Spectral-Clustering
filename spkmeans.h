@@ -44,4 +44,7 @@ void print_array(double* array, int row);
 void merge(Eigenvector* eigenvector, Eigenvector* R, Eigenvector* L, int l, int m, int r);
 void merge_sort(Eigenvector* eigenvector, int l, int r);
 int eigengap_heuristic(Eigenvector* eigenvector, int row);
+void spk_goal(double** points, int row, int col, int k);
+double** creating_U(Eigenvector* eignvector, int k, int row);
+void renormalizing_U(double** U, int k, int row);
 // double** convert_python_to_c(PyObject* data_points_p, int dimension_p, int num_of_points_p);
