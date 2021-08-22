@@ -12,7 +12,7 @@ int main(int argc, char const *argv[])
     double result;
     int dimension_cnt = 0;
     int k = atoi(argv[1]);
-    char goal = (char) argv[2][0];
+    char goal = argv[2][0];
     file = fopen(argv[3], "r");
     assert(file != NULL && "An Error Has Occurred");
     /*we have a limit of 10 features, 9 commas,
@@ -57,8 +57,9 @@ int main(int argc, char const *argv[])
         num_of_points++;
     }
     fclose(file);
-    data_points = (double**)realloc(data_points, (num_of_points - 1) * sizeof(double *));
-    
+    data_points = (double**)realloc(data_points, (num_of_points) * sizeof(double *));
+    assert(data_points != NULL && "An Error Has Occurred");
+
     switch (goal)
     {
     case 'w':
@@ -106,7 +107,6 @@ double* str_to_double(char* str_point, int dimension)
 {
     double* point = (double*)malloc(dimension * sizeof(double));
     assert(point != NULL && "An Error Has Occured");
-    printf("%p", point);
     char* cordinate = (char*)calloc(11, sizeof(char));
     assert(cordinate != NULL && "An Error Has Occured");
 
@@ -170,7 +170,7 @@ void lnorm_goal(double** points, int row, int col)
 void jacobi_goal(double** sym_matrix, int row, int col)
 {
     Eigenvector* result;
-    int i;
+    int i = 0;
 
     result = jacobi(sym_matrix, row, col);
     for (i = 0; i < row; i++)
@@ -183,6 +183,7 @@ void jacobi_goal(double** sym_matrix, int row, int col)
         {
             printf("%.4f,", result[i].value);
         }
+
     }
     printf("\n");
 
@@ -292,6 +293,7 @@ double** adjacency_matrix(double** points, int num_of_points, int dimension)
             */
             result[i][j] = weight;
             result[j][i] = weight;
+            weight = 0.0;
         }
     }
     return result;
@@ -305,6 +307,7 @@ double** diagonal_degree_matrix(double** points, int row, int col)
     int j = 0;
     result = zero_matrix(row, col);
     adj_matrix = adjacency_matrix(points, row, col);
+    printf("row: %d", row);
     for (i = 0; i < row; i++)
     {
         for (j = 0; j < col; j++)
