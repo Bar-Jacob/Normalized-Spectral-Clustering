@@ -216,7 +216,7 @@ void spk_goal(double** points, int row, int col, int k)
     U = creating_U(eignvectors, k, row);
     renormalizing_U(U, k, row);
     printf("before kmeans");
-    kmeans(points, U, k, row, row);
+    kmeans(points, U, k, col, row);
     printf("after kmeans");
     free_memory(U, row);
 }
@@ -299,18 +299,18 @@ double** adjacency_matrix(double** points, int num_of_points, int dimension)
     return result;
 }
 
-double** diagonal_degree_matrix(double** points, int row, int col)
+double** diagonal_degree_matrix(double** points, int row, int dimension)
 {
     double** result;
     double** adj_matrix;
     int i = 0;
     int j = 0;
-    result = zero_matrix(row, col);
-    adj_matrix = adjacency_matrix(points, row, col);
+    result = zero_matrix(row, row);
+    adj_matrix = adjacency_matrix(points, row, dimension);
     printf("row: %d", row);
     for (i = 0; i < row; i++)
     {
-        for (j = 0; j < col; j++)
+        for (j = 0; j < row; j++)
         {
             result[i][i] += adj_matrix[i][j];
         }
@@ -324,16 +324,16 @@ computing laplacian by substract the multiplication of 3 matrixes
 (D^-0.5, W, D^-0.5, whereas D is the diagonal degree and W is the adjacency), 
 from the identity matrix
 */
-double** normalized_graph_laplacian(double** points, int row, int col)
+double** normalized_graph_laplacian(double** points, int row, int dimension)
 {
     double** adj_matrix;
     double** diag_matrix;
     double** multip_matrix;
     double** result;
 
-    adj_matrix = adjacency_matrix(points, row, col);
+    adj_matrix = adjacency_matrix(points, row, dimension);
     printf("after adj");
-    diag_matrix = diagonal_degree_matrix(points, row, col);
+    diag_matrix = diagonal_degree_matrix(points, row, dimension);
     printf("after diag");
     /*
     changes the matrix itself, since we give a pointer to the matrix 
@@ -341,16 +341,16 @@ double** normalized_graph_laplacian(double** points, int row, int col)
     manipulated_diagonal(diag_matrix, row);
     printf("after mani");
     multip_matrix = three_matrix_multiplication(diag_matrix, adj_matrix,
-                                                diag_matrix, row, col);
+                                                diag_matrix, row, dimension);
     printf("after multi");
     free_memory(adj_matrix, row);
     free_memory(diag_matrix, row);
     printf("after 2 free");
-    result = identity_matrix(row, col);
+    result = identity_matrix(row, row);
     /*
     changes the first matrix given, so the result will be on the result matrix
     */
-    matrix_substraction(result, multip_matrix, row, col);
+    matrix_substraction(result, multip_matrix, row, dimension);
     free_memory(multip_matrix, row);
 
     return result;
@@ -374,8 +374,8 @@ Eigenvector* jacobi(double** lp_matrix, int row, int col)
 
     /*in order to avoid free function on a pointer that has'nt been
     defined yet, we define tmp_matrix2*/
-    tmp_matrix2 = identity_matrix(row, col);
-    eigenvectors_matrix = identity_matrix(row, col);
+    tmp_matrix2 = identity_matrix(row, row);
+    eigenvectors_matrix = identity_matrix(row, row);
 
     /*
     The algorithm will stop after 100 iterations or if there is a convergence,
@@ -395,15 +395,16 @@ Eigenvector* jacobi(double** lp_matrix, int row, int col)
 
         /*release tmp_matrix and tmp_matrix2*/
         free_memory(tmp_matrix, row);
-        free_memory(tmp_matrix2, row);
 
         if (is_convergence(tmp_matrix2, lp_matrix_tag,
-                           row, col, first_iter) == 1)
+                           row, first_iter) == 1)
         {
+            free_memory(tmp_matrix2, row);
             converged = 1;
         }
         else
         {
+            free_memory(tmp_matrix2, row);
             tmp_matrix2 = lp_matrix;
             lp_matrix = lp_matrix_tag;
         }
@@ -475,7 +476,7 @@ builds the rotation matrix
 */
 double** rotation_matrix(double** lp_matrix, int row, int col)
 {
-    double** result = identity_matrix(row, col);
+    double** result = identity_matrix(row, row);
     double* sct_val = s_c_t_calculation(lp_matrix, row, col);
     int i = (int)sct_val[3];
     int j = (int)sct_val[4];
@@ -530,7 +531,7 @@ calculating A_tag (only the cells that changed)
 double** jacobi_calculations(double** lp_matrix, int row,
                              int col, double* sct_vals)
 {
-    double** A_tag = zero_matrix(row, col);
+    double** A_tag = zero_matrix(row, row);
     int n = 0;
     int m = 0;
     int i = (int) sct_vals[3];
@@ -579,7 +580,7 @@ double** jacobi_calculations(double** lp_matrix, int row,
 /*
 calculates the sum of squares of all off-diagonal elements of the matrix
 */
-double sos_off(double** sym_matrix, int row, int col)
+double sos_off(double** sym_matrix, int row)
 {
     int i = 0;
     int j = 0;
@@ -588,9 +589,9 @@ double sos_off(double** sym_matrix, int row, int col)
     {
         /*the input is a symmetrical matrix 
         computing only the upper triangle without diagonal*/
-        for (j = i + 1; j < col; j++)
+        for (j = i + 1; j < row; j++)
         {
-            sos = sos + pow(sym_matrix[i][j], 2);
+            sos += pow(sym_matrix[i][j], 2);
         }
     }
     /*from symmetry*/
@@ -603,14 +604,14 @@ checks if there is a convergence by calculating:
 off(A)^2 - off(A')^2 < = 0.001
 */
 int is_convergence(double** lp_matrix, double** lp_matrix_tag, int row,
-                                                 int col, int first_iter)
+                                                 int first_iter)
 {
     /*lp_matrix_tag isn't ready before we start the jacobi algorithm*/
     if(first_iter == 1){
         return 0;
     }
-    double sos_lp = sos_off(lp_matrix, row, col);
-    double sos_lp_tag = sos_off(lp_matrix_tag, row, col);
+    double sos_lp = sos_off(lp_matrix, row);
+    double sos_lp_tag = sos_off(lp_matrix_tag, row);
 
     if (sos_lp - sos_lp_tag <= 0.001 || (sos_lp_tag == 0.0))
     {
@@ -710,7 +711,7 @@ double** matrix_multiplication(double** matrix1,
     int i = 0;
     int j = 0;
     int n = 0;
-    result = zero_matrix(row, col);
+    result = zero_matrix(row, row);
     for (i = 0; i < row; i++)
     {
         for (j = 0; j < col; j++)
