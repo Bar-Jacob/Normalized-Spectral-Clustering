@@ -19,12 +19,11 @@ double** diagonal_degree_matrix(double** points, int row, int dimension);
 double** normalized_graph_laplacian(double** points, int row, int dimension);
 Eigenvector* jacobi(double** points, int row);
 double* largest_off_digonal_value(double** lp_matrix, int row);
-double** rotation_matrix(double** lp_matrix, int row);
+double** rotation_matrix(double** lp_matrix, int row, double* sct_val);
 double** jacobi_calculations(double** lp_matrix, int row,
                                         double* sct_vals);
 double sos_off(double** lp_matrix, int row);
-int is_convergence(double** lp_matrix, double** lp_matrix_tag,
-    int row, int first_iter);
+int is_convergence(double** lp_matrix, double** lp_matrix_tag, int row);
 double** matrix_multiplication(double** matrix1,
     double** matrix2, int row, int col);
 double** three_matrix_multiplication(double** matrix1,

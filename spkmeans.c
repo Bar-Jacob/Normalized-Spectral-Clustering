@@ -114,6 +114,7 @@ void jacobi_goal(double** sym_matrix, int row)
     int i = 0;
 
     result = jacobi(sym_matrix, row);
+    printf("im here");
     for (i = 0; i < row; i++)
     {
         if (i == row - 1)
@@ -291,17 +292,12 @@ Eigenvector* jacobi(double** lp_matrix, int row)
     double** lp_matrix_tag;
     double** eigenvectors_matrix;
     double** tmp_matrix;
-    double** tmp_matrix2;
     double** rotate_matrix;
     double* sct_vals;
-    Eigenvector *result;
+    Eigenvector* result;
     int cnt = 0;
-    int first_iter = 1;
     int converged = 0;
 
-    /*in order to avoid free function on a pointer that has'nt been
-    defined yet, we define tmp_matrix2*/
-    tmp_matrix2 = identity_matrix(row, row);
     eigenvectors_matrix = identity_matrix(row, row);
 
     /*
@@ -310,38 +306,35 @@ Eigenvector* jacobi(double** lp_matrix, int row)
     */
     while (cnt != 100 && converged == 0)
     {
-        rotate_matrix = rotation_matrix(lp_matrix, row);
         sct_vals = s_c_t_calculation(lp_matrix, row);
+        rotate_matrix = rotation_matrix(lp_matrix, row, sct_vals);
         lp_matrix_tag = jacobi_calculations(lp_matrix, row, sct_vals);
 
         /*points to the last updated eigenvectors matrix*/
         tmp_matrix = eigenvectors_matrix;
 
         /*eigenvectors_matrix will now point to a new updated eigenvectors matrix*/
-        eigenvectors_matrix = matrix_multiplication(tmp_matrix, rotate_matrix, row, row);
+        eigenvectors_matrix = matrix_multiplication(eigenvectors_matrix, rotate_matrix, row, row);
 
-        /*release tmp_matrix and tmp_matrix2*/
+        /*release tmp_matrix*/
         free_memory(tmp_matrix, row);
+        tmp_matrix = lp_matrix;
 
-        if (is_convergence(tmp_matrix2, lp_matrix_tag,
-                           row, first_iter) == 1)
+        if (is_convergence(lp_matrix, lp_matrix_tag, row) == 1)
         {
-            free_memory(tmp_matrix2, row);
+            free_memory(tmp_matrix, row);
             converged = 1;
         }
         else
         {
-            free_memory(tmp_matrix2, row);
-            tmp_matrix2 = lp_matrix;
             lp_matrix = lp_matrix_tag;
+            free_memory(tmp_matrix, row);
         }
         cnt++;
-        first_iter = 0;
+        free(sct_vals);
+        free_memory(rotate_matrix, row);
     }
 
-    free_memory(lp_matrix, row);
-    free_memory(rotate_matrix, row);
-    free(sct_vals);
 
     /*returns an array with two matrixes - eigenvectors and eigenvalues */
     result = creating_eigenvector_array(eigenvectors_matrix, lp_matrix_tag, row);
@@ -401,10 +394,9 @@ int eigengap_heuristic(Eigenvector* eigenvector, int row)
 /*
 builds the rotation matrix
 */
-double** rotation_matrix(double** lp_matrix, int row)
+double** rotation_matrix(double** lp_matrix, int row, double* sct_val)
 {
     double** result = identity_matrix(row, row);
-    double* sct_val = s_c_t_calculation(lp_matrix, row);
     int i = (int)sct_val[3];
     int j = (int)sct_val[4];
 
@@ -412,8 +404,6 @@ double** rotation_matrix(double** lp_matrix, int row)
     result[j][j] = sct_val[1];
     result[i][j] = sct_val[0];
     result[j][i] = -sct_val[0];
-
-    free(sct_val);
 
     return result;
 }
@@ -428,15 +418,16 @@ double* s_c_t_calculation(double** lp_matrix, int row)
     int j = (int)pivot_arr[2];
     double pivot_max = pivot_arr[0];
     double teta = (lp_matrix[j][j] - lp_matrix[i][i]) / (2 * pivot_max);
-
+    double tmp_calc = fabs(teta) + sqrt(pow(teta, 2) + 1);
+    
     double t = 0.0;
     if (teta < 0)
     {
-        t = -1 / (fabs(teta) + sqrt(pow(teta, 2) + 1));
+        t = -1 / (tmp_calc);
     }
     else
     {
-        t = 1 / (fabs(teta) + sqrt(pow(teta, 2) + 1));
+        t = 1 / (tmp_calc);
     }
 
     double c = 1 / (sqrt(pow(t, 2) + 1));
@@ -530,13 +521,8 @@ double sos_off(double** sym_matrix, int row)
 checks if there is a convergence by calculating:
 off(A)^2 - off(A')^2 < = 0.001
 */
-int is_convergence(double** lp_matrix, double** lp_matrix_tag, int row,
-                                                 int first_iter)
+int is_convergence(double** lp_matrix, double** lp_matrix_tag, int row)
 {
-    /*lp_matrix_tag isn't ready before we start the jacobi algorithm*/
-    if(first_iter == 1){
-        return 0;
-    }
     double sos_lp = sos_off(lp_matrix, row);
     double sos_lp_tag = sos_off(lp_matrix_tag, row);
 
@@ -823,7 +809,6 @@ void merge_sort(Eigenvector* eigenvector, int l, int r)
         free(R);
     }
 }
-
 
 /*
 converting all data points from python into data points in C
