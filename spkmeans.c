@@ -78,28 +78,6 @@ int main(int argc, char const *argv[])
         spk_goal(data_points, num_of_points, dimension, k);
         break;
     }
-    
-    // double **res;
-    // double **res2;
-    // res = zero_matrix(3, 3);
-    // res2 = zero_matrix(3, 3);
-    // res[0][0] = 3;
-    // res[0][1] = 2;
-    // res[0][2] = 4;
-    // // res[0][3] = 4;
-    // res[1][0] = 2;
-    // res[1][1] = 0;
-    // res[1][2] = 2;
-    // // res[1][3] = 2;
-    // res[2][0] = 4;
-    // res[2][1] = 2;
-    // res[2][2] = 3;
-    // // res[2][3] = 3;
-    // // res[3][0] = 2;
-    // // res[3][1] = 4;
-    // // res[3][2] = 7;
-    // // res[3][3] = 2;
-    // // Eigenvector* A = jacobi(res,3,3);
     return 0;
 }
 
@@ -161,26 +139,17 @@ void jacobi_goal(double** sym_matrix, int row)
 
 void spk_goal(double** points, int row, int col, int k)
 {
-    printf("in spk_goal");
     double** U;
-    printf("before lapl");
     double** laplacian = normalized_graph_laplacian(points, row, col);
-    printf("after lapl");
     Eigenvector* eignvectors = jacobi(laplacian, row);
-    printf("after jacobi");
-    printf("k: %d\n",k);
     if(k == 0){
         k = eigengap_heuristic(eignvectors, row);
     }else{
-        printf("before merge");
         merge_sort(eignvectors, 0, row-1);
     }
-    printf("before U");
     U = creating_U(eignvectors, k, row);
     renormalizing_U(U, k, row);
-    printf("before kmeans");
-    kmeans(points, U, k, col, row);
-    printf("after kmeans");
+    kmeans(U, k, col, row);
     free_memory(U, row);
     free_memory(points, row);
 }
@@ -271,7 +240,6 @@ double** diagonal_degree_matrix(double** points, int row, int dimension)
     int j = 0;
     result = zero_matrix(row, row);
     adj_matrix = adjacency_matrix(points, row, dimension);
-    printf("row: %d", row);
     for (i = 0; i < row; i++)
     {
         for (j = 0; j < row; j++)
@@ -711,7 +679,6 @@ gets a diagonal matrix and raise each cell on the diagonal by the power of -0.5
 */
 void manipulated_diagonal(double** diag_matrix, int row)
 {
-    printf("row: %d", row);
     int i = 0;
     for (i = 0; i < row; i++)
     {

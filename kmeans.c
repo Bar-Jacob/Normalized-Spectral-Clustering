@@ -26,7 +26,6 @@ void kmeans(double** clusters_spk, int k,
     int cnt = 0;
     int i = 0;
     int j = 0;
-    printf("in kmeans");
     /*
     Initializing k clusters
     */
@@ -41,8 +40,6 @@ void kmeans(double** clusters_spk, int k,
         clusters[i].sum_of_points = (double*)calloc(dimension, sizeof(double));
         assert(clusters[i].sum_of_points != NULL && "An Error Has Occured");
     }
-
-    printf("after initializing");
 
     cnt = 0;
     while ((cnt < 300) && (!same_average))
@@ -66,7 +63,6 @@ void kmeans(double** clusters_spk, int k,
         cnt++;
     }
 
-    printf("before print");
     for(i = 0; i < k; i++){
         for(j = 0; j < dimension; j++){
             if(j == dimension-1){
