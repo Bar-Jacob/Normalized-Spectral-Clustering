@@ -10,15 +10,15 @@ typedef struct Cluster
     double* centroid;
 }Cluster;
 
-void kmeans(double** data_points, double** clusters_spk, int k, 
+void kmeans(double** clusters_spk, int k, 
                         int dimension, int num_of_points);
 double Euclidian_Distance(double* vector1, double* vector2, int dimension);
 void finding_cluster(double* vector, Cluster* clusters, int k, int dimension);
 int update_mean(Cluster* clusters, int same_average, int k, int dimension);
 void update_sum_of_elements_in_cluster(double* vector, int loc, Cluster* clusters, int dimension);
-void free_mem(Cluster* clusters, double** data_points, int k, int num_of_points);
+void free_clusters(Cluster* clusters, int k, int num_of_points);
 
-void kmeans(double** data_points, double** clusters_spk, int k, 
+void kmeans(double** clusters_spk, int k, 
                         int dimension, int num_of_points)
 {
     Cluster* clusters;
@@ -49,7 +49,7 @@ void kmeans(double** data_points, double** clusters_spk, int k,
     {
         same_average = 1;
         for(i = 0; i < num_of_points; i++){
-            finding_cluster(data_points[i], clusters, k, dimension);
+            finding_cluster(clusters_spk[i], clusters, k, dimension);
         }
         
         same_average = update_mean(clusters, same_average, k, dimension);
@@ -77,7 +77,7 @@ void kmeans(double** data_points, double** clusters_spk, int k,
         }
         printf("\n");
     }
-    free_mem(clusters, data_points, k, num_of_points);
+    free_clusters(clusters, k, num_of_points);
 }
 
 void finding_cluster(double* vector, Cluster* clusters, int k, int dimension){
@@ -129,14 +129,9 @@ double Euclidian_Distance(double* vector1, double* centroid, int dimension){
     return sum;
 }
 
-void free_mem(Cluster* clusters, double** data_points, int k, int num_of_points){
-    int i = 0;
+void free_clusters(Cluster* clusters, int k, int num_of_points){
     int j = 0;
-    for(i = 0; i < num_of_points; i++){
-        free(data_points[i]);
-    }
-    free(data_points);
-
+    
     for(j = 0; j < k; j++){
         free(clusters[j].centroid);
         free(clusters[j].sum_of_points);

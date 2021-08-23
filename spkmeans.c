@@ -72,7 +72,7 @@ int main(int argc, char const *argv[])
         lnorm_goal(data_points, num_of_points, dimension);
         break;
     case 'j':
-        jacobi_goal(data_points, num_of_points, dimension);
+        jacobi_goal(data_points, num_of_points);
         break;
     case 's':
         spk_goal(data_points, num_of_points, dimension, k);
@@ -103,76 +103,39 @@ int main(int argc, char const *argv[])
     return 0;
 }
 
-double* str_to_double(char* str_point, int dimension)
-{
-    double* point = (double*)malloc(dimension * sizeof(double));
-    assert(point != NULL && "An Error Has Occured");
-    char* cordinate = (char*)calloc(11, sizeof(char));
-    assert(cordinate != NULL && "An Error Has Occured");
-
-    int i_cord = 0;
-    int i_dim = 0;
-    int i = 0;
-    double result;
-    for (i = 0; i < 99; i++)
-    {
-        /*we reached to the end of the number*/
-
-        if (str_point[i] == ',' || str_point[i] == '\0')
-        {
-            cordinate[i_cord] = '\0';
-            i_cord = 0;
-            /*converting a cordinate as a string to double*/
-            result = strtod(cordinate, NULL);
-            /*puts the cordinate in the point array*/
-            point[i_dim] = result;
-            i_dim++;
-            if (str_point[i] == '\0')
-            {
-                break;
-            }
-        }
-        else
-        {
-            /*copy the number as a string to a small array*/
-            cordinate[i_cord] = str_point[i];
-            i_cord++;
-        }
-    }
-    free(cordinate);
-    return point;
-}
-
 void wam_goal(double** points, int num_of_points, int dimension)
 {
     double** result;
     result = adjacency_matrix(points, num_of_points, dimension);
-    print_matrix(result, num_of_points, dimension);
+    print_matrix(result, num_of_points, num_of_points);
     free_memory(result, num_of_points);
+    free_memory(points, num_of_points);
 }
 
-void ddg_goal(double** points, int row, int col)
+void ddg_goal(double** points, int row, int dimension)
 {
     double** result;
-    result = diagonal_degree_matrix(points, row, col);
-    print_matrix(result, row, col);
+    result = diagonal_degree_matrix(points, row, dimension);
+    print_matrix(result, row, row);
     free_memory(result, row);
+    free_memory(points, row);
 }
 
-void lnorm_goal(double** points, int row, int col)
+void lnorm_goal(double** points, int row, int dimension)
 {
     double** result;
-    result = normalized_graph_laplacian(points, row, col);
-    print_matrix(result, row, col);
+    result = normalized_graph_laplacian(points, row, dimension);
+    print_matrix(result, row, row);
     free_memory(result, row);
+    free_memory(points, row);
 }
 
-void jacobi_goal(double** sym_matrix, int row, int col)
+void jacobi_goal(double** sym_matrix, int row)
 {
     Eigenvector* result;
     int i = 0;
 
-    result = jacobi(sym_matrix, row, col);
+    result = jacobi(sym_matrix, row);
     for (i = 0; i < row; i++)
     {
         if (i == row - 1)
@@ -203,7 +166,7 @@ void spk_goal(double** points, int row, int col, int k)
     printf("before lapl");
     double** laplacian = normalized_graph_laplacian(points, row, col);
     printf("after lapl");
-    Eigenvector* eignvectors = jacobi(laplacian, row, col);
+    Eigenvector* eignvectors = jacobi(laplacian, row);
     printf("after jacobi");
     printf("k: %d\n",k);
     if(k == 0){
@@ -219,6 +182,7 @@ void spk_goal(double** points, int row, int col, int k)
     kmeans(points, U, k, col, row);
     printf("after kmeans");
     free_memory(U, row);
+    free_memory(points, row);
 }
 
 /*takes the first k eignvectors (after being sorted by their values)
@@ -332,25 +296,20 @@ double** normalized_graph_laplacian(double** points, int row, int dimension)
     double** result;
 
     adj_matrix = adjacency_matrix(points, row, dimension);
-    printf("after adj");
     diag_matrix = diagonal_degree_matrix(points, row, dimension);
-    printf("after diag");
     /*
     changes the matrix itself, since we give a pointer to the matrix 
     */
     manipulated_diagonal(diag_matrix, row);
-    printf("after mani");
     multip_matrix = three_matrix_multiplication(diag_matrix, adj_matrix,
-                                                diag_matrix, row, dimension);
-    printf("after multi");
+                                                diag_matrix, row, row);
     free_memory(adj_matrix, row);
     free_memory(diag_matrix, row);
-    printf("after 2 free");
     result = identity_matrix(row, row);
     /*
     changes the first matrix given, so the result will be on the result matrix
     */
-    matrix_substraction(result, multip_matrix, row, dimension);
+    matrix_substraction(result, multip_matrix, row, row);
     free_memory(multip_matrix, row);
 
     return result;
@@ -359,7 +318,7 @@ double** normalized_graph_laplacian(double** points, int row, int dimension)
 /*
 The jacobi eigenvalue algorithm
 */
-Eigenvector* jacobi(double** lp_matrix, int row, int col)
+Eigenvector* jacobi(double** lp_matrix, int row)
 {
     double** lp_matrix_tag;
     double** eigenvectors_matrix;
@@ -383,15 +342,15 @@ Eigenvector* jacobi(double** lp_matrix, int row, int col)
     */
     while (cnt != 100 && converged == 0)
     {
-        rotate_matrix = rotation_matrix(lp_matrix, row, col);
-        sct_vals = s_c_t_calculation(lp_matrix, row, col);
-        lp_matrix_tag = jacobi_calculations(lp_matrix, row, col, sct_vals);
+        rotate_matrix = rotation_matrix(lp_matrix, row);
+        sct_vals = s_c_t_calculation(lp_matrix, row);
+        lp_matrix_tag = jacobi_calculations(lp_matrix, row, sct_vals);
 
         /*points to the last updated eigenvectors matrix*/
         tmp_matrix = eigenvectors_matrix;
 
         /*eigenvectors_matrix will now point to a new updated eigenvectors matrix*/
-        eigenvectors_matrix = matrix_multiplication(tmp_matrix, rotate_matrix, row, col);
+        eigenvectors_matrix = matrix_multiplication(tmp_matrix, rotate_matrix, row, row);
 
         /*release tmp_matrix and tmp_matrix2*/
         free_memory(tmp_matrix, row);
@@ -474,10 +433,10 @@ int eigengap_heuristic(Eigenvector* eigenvector, int row)
 /*
 builds the rotation matrix
 */
-double** rotation_matrix(double** lp_matrix, int row, int col)
+double** rotation_matrix(double** lp_matrix, int row)
 {
     double** result = identity_matrix(row, row);
-    double* sct_val = s_c_t_calculation(lp_matrix, row, col);
+    double* sct_val = s_c_t_calculation(lp_matrix, row);
     int i = (int)sct_val[3];
     int j = (int)sct_val[4];
 
@@ -493,9 +452,9 @@ double** rotation_matrix(double** lp_matrix, int row, int col)
 /*
 calculates s, c, t
 */
-double* s_c_t_calculation(double** lp_matrix, int row, int col)
+double* s_c_t_calculation(double** lp_matrix, int row)
 {
-    double* pivot_arr = largest_off_digonal_value(lp_matrix, row, col);
+    double* pivot_arr = largest_off_digonal_value(lp_matrix, row);
     double* result_arr = (double *)calloc(5, sizeof(double));
     int i = (int)pivot_arr[1];
     int j = (int)pivot_arr[2];
@@ -529,7 +488,7 @@ double* s_c_t_calculation(double** lp_matrix, int row, int col)
 calculating A_tag (only the cells that changed)
 */
 double** jacobi_calculations(double** lp_matrix, int row,
-                             int col, double* sct_vals)
+                             double* sct_vals)
 {
     double** A_tag = zero_matrix(row, row);
     int n = 0;
@@ -543,7 +502,7 @@ double** jacobi_calculations(double** lp_matrix, int row,
     */
     for (n = 0; n < row; n++)
     {
-        for (m = 0; m < col; m++)
+        for (m = 0; m < row; m++)
         {
             A_tag[n][m] = lp_matrix[n][m];
         }
@@ -625,7 +584,7 @@ finds the largest off diagonal value, searches only the upper triangle
 since the matrix is symmetrical. 
 returns an array of the value, and it's indices
 */
-double* largest_off_digonal_value(double** lp_matrix, int row, int col)
+double* largest_off_digonal_value(double** lp_matrix, int row)
 {
     int i = 0;
     int j = 0;
@@ -638,7 +597,7 @@ double* largest_off_digonal_value(double** lp_matrix, int row, int col)
 
     for (i = 0; i < row; i++)
     {
-        for (j = i + 1; j < col; j++)
+        for (j = i + 1; j < row; j++)
         {
             if (fabs(lp_matrix[i][j]) > max)
             {
