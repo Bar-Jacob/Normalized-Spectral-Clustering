@@ -1,5 +1,4 @@
 #include "spkmeans.h"
-#include "kmeans.c"
 
 int main(int argc, char const *argv[])
 {
@@ -19,7 +18,7 @@ int main(int argc, char const *argv[])
     and each number has max of 4 digits before decimal point and after it*/
     char* str_point = (char *)calloc(109, sizeof(char));
     assert(str_point != NULL && "An Error Has Occurred");
-    double** data_points = (double **)calloc(1000, sizeof(double *));
+    double** data_points = (double **)calloc(50, sizeof(double *));
     assert(data_points != NULL && "An Error Has Occurred");
 
     while (fgets(str_point, 109, file) != NULL)
@@ -114,7 +113,6 @@ void jacobi_goal(double** sym_matrix, int row)
     int i = 0;
 
     result = jacobi(sym_matrix, row);
-    printf("im here");
     for (i = 0; i < row; i++)
     {
         if (i == row - 1)
@@ -142,17 +140,40 @@ void spk_goal(double** points, int row, int col, int k)
 {
     double** U;
     double** laplacian = normalized_graph_laplacian(points, row, col);
+    int i;
     Eigenvector* eignvectors = jacobi(laplacian, row);
+
     if(k == 0){
         k = eigengap_heuristic(eignvectors, row);
     }else{
         merge_sort(eignvectors, 0, row-1);
+
     }
     U = creating_U(eignvectors, k, row);
     renormalizing_U(U, k, row);
-    kmeans(U, k, col, row);
+    kmeans(U, k, k, row);
     free_memory(U, row);
     free_memory(points, row);
+}
+
+PyObject* spk_goal_python(double** points, int row, int col, int k)
+{
+    double** U;
+    double** laplacian = normalized_graph_laplacian(points, row, col);
+    PyObject* points_py;
+    Eigenvector* eignvectors = jacobi(laplacian, row);
+
+    if(k == 0){
+        k = eigengap_heuristic(eignvectors, row);
+    }else{
+        merge_sort(eignvectors, 0, row-1);
+
+    }
+    U = creating_U(eignvectors, k, row);
+    renormalizing_U(U, k, row);
+    points_py = cToPyObject(U, k, row);
+    free_memory(points, row);
+    return points_py;
 }
 
 /*takes the first k eignvectors (after being sorted by their values)
@@ -340,7 +361,6 @@ Eigenvector* jacobi(double** lp_matrix, int row)
     result = creating_eigenvector_array(eigenvectors_matrix, lp_matrix_tag, row);
     free_memory(eigenvectors_matrix, row);
     free_memory(lp_matrix_tag, row);
-
     return result;
 }
 
@@ -388,7 +408,7 @@ int eigengap_heuristic(Eigenvector* eigenvector, int row)
             index = i;
         }
     }
-    return index;
+    return index + 1;
 }
 
 /*
@@ -525,8 +545,9 @@ int is_convergence(double** lp_matrix, double** lp_matrix_tag, int row)
 {
     double sos_lp = sos_off(lp_matrix, row);
     double sos_lp_tag = sos_off(lp_matrix_tag, row);
+    double epsilon = pow(10, -15);
 
-    if (sos_lp - sos_lp_tag <= 0.001 || (sos_lp_tag == 0.0))
+    if (sos_lp - sos_lp_tag <= epsilon || (sos_lp_tag == 0.0))
     {
         return 1;
     }
@@ -553,7 +574,7 @@ double* largest_off_digonal_value(double** lp_matrix, int row)
     {
         for (j = i + 1; j < row; j++)
         {
-            if (fabs(lp_matrix[i][j]) > max)
+            if (fabs(lp_matrix[i][j]) > fabs(max))
             {
                 max = lp_matrix[i][j];
                 index_c = j;
@@ -565,6 +586,7 @@ double* largest_off_digonal_value(double** lp_matrix, int row)
     result[1] = index_r;
     result[2] = index_c;
     return result;
+    
 }
 
 /*
@@ -688,10 +710,18 @@ void print_matrix(double** matrix, int row, int col)
         {
             if (j == col - 1)
             {
+                if (matrix[i][j] < 0 && matrix[i][j] > -0.00001)
+                {
+                    matrix[i][j] = matrix[i][j] * -1;
+                }
                 printf("%.4f", matrix[i][j]);
             }
             else
             {
+                if (matrix[i][j] < 0 && matrix[i][j] > -0.00004)
+                {
+                    matrix[i][j] = matrix[i][j] * -1;
+                }
                 printf("%.4f,", matrix[i][j]);
             }
         }
@@ -706,10 +736,18 @@ void print_array(double* array, int row)
     {
         if (i == row - 1)
         {
+        if (array[i] < 0 && array[i] > -0.00004)
+        {
+            array[i] = array[i] * -1;
+        }
             printf("%.4f", array[i]);
         }
         else
         {
+        if (array[i] < 0 && array[i] > -0.00004)
+        {
+            array[i] = array[i] * -1;
+        }
             printf("%.4f,", array[i]);
         }
     }
@@ -813,23 +851,53 @@ void merge_sort(Eigenvector* eigenvector, int l, int r)
 /*
 converting all data points from python into data points in C
 */
-// double** convert_python_to_c(PyObject* data_points_p, int dimension, int num_of_points)
-// {
-//     int cnt = 0;
-//     int i = 0;
-//     int j = 0;
-//     double** data_points = (double**)calloc(num_of_points, sizeof(*data_points));
-//     assert(data_points != NULL && "An Error Has Occured");
+double** convert_python_to_c(PyObject* data_points_p, int dimension, int num_of_points)
+{
+    int cnt = 0;
+    int i = 0;
+    int j = 0;
+    double** data_points = (double**)calloc(num_of_points, sizeof(*data_points));
+    assert(data_points != NULL && "An Error Has Occured");
 
-//     for (i = 0; i < num_of_points; i++)
-//     {
-//         data_points[i] = (double *)calloc(dimension, sizeof(*data_points[i]));
-//         assert(data_points[i] != NULL && "An Error Has Occured");
-//         for (j = 0; j < dimension; j++)
-//         {
-//             data_points[i][j] = PyFloat_AsDouble(PyList_GetItem(data_points_p, cnt));
-//             cnt++;
-//         }
-//     }
-//     return data_points;
-// }
+    for (i = 0; i < num_of_points; i++)
+    {
+        data_points[i] = (double *)calloc(dimension, sizeof(*data_points[i]));
+        assert(data_points[i] != NULL && "An Error Has Occured");
+        for (j = 0; j < dimension; j++)
+        {
+            data_points[i][j] = PyFloat_AsDouble(PyList_GetItem(data_points_p, cnt));
+            cnt++;
+        }
+    }
+    return data_points;
+}
+
+/*
+after finishing running kmeans algorithm we want to return the results to python 
+converting types from C to python
+*/
+PyObject* cToPyObject(double** T, int dimension, int num_of_points)
+{
+    PyObject* points_py;
+    int i = 0;
+    int j = 0;
+    PyObject* value;
+
+    points_py = PyList_New(num_of_points);
+    for (i = 0; i < num_of_points; i++)
+    {
+        PyObject* curr_vector;
+        curr_vector = PyList_New(dimension);
+        for (j = 0; j < dimension; j++)
+        {
+            value = Py_BuildValue("d", T[i][j]);
+            PyList_SetItem(curr_vector, j, value);
+        }
+        /*
+        adding the PyObject centroid to the PyList clusters
+        */
+        PyList_SetItem(points_py, i, curr_vector);
+    }
+    free_memory(T, num_of_points);
+    return points_py;
+}

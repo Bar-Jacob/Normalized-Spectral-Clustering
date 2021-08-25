@@ -1,61 +1,82 @@
 #include "spkmeans.h"
 
-static void fit_capi(PyObject *self, PyObject *args);
+static PyObject* fit_capi(PyObject* self, PyObject* args);
+static PyObject* fit_capi_pp(PyObject* self, PyObject* args);
 
 /*
 when calling fit() from python, this function is called. 
 getting arguments from python and pass it to the adequate goal function
 */
-static void fit_capi(PyObject *self, PyObject *args)
+static PyObject* fit_capi(PyObject* self, PyObject* args)
 {
     int k;
-    char goal;
+    int goal;
     int dimension_p;
     int num_of_points_p;
     double** data_points;
     PyObject *data_points_p;
-    printf("in fit\n");
 
-    printf("before first if");
-    if (!(PyArg_ParseTuple(args, "isiiO", &k, &goal, &dimension_p, &num_of_points_p, &data_points_p)))
+    if (!(PyArg_ParseTuple(args, "iiiiO", &k, &goal, &dimension_p, &num_of_points_p, &data_points_p)))
     {
-        printf("before error in first if");
         printf("An Error Has Occured");
         exit(0);
     }
-
-    printf("before second if");
     if (!PyList_Check(data_points_p))
     {
-        printf("before error in second if");
         printf("An Error Has Occured");
         exit(0);
     }
-    printf("before convert");
     data_points = convert_python_to_c(data_points_p, dimension_p, num_of_points_p);
     
-    printf("before goals");
     switch (goal)
     {
-    case 'w':
+    case 1:
         wam_goal(data_points, num_of_points_p, dimension_p);
         break;
-    case 'd':
+    case 2:
         ddg_goal(data_points, num_of_points_p, dimension_p);
         break;
-    case 'l':
+    case 3:
         lnorm_goal(data_points, num_of_points_p, dimension_p);
         break;
-    case 'j':
-        printf("in jacobi goal");
-        jacobi_goal(data_points, num_of_points_p, dimension_p);
+    case 4:
+        jacobi_goal(data_points, num_of_points_p);
         break;
-    case 's':
-        break;
+    case 0:
+        return Py_BuildValue("O", 
+        spk_goal_python(data_points, num_of_points_p, dimension_p, k));
     }
-
-    printf("at the end of fit");
+    Py_RETURN_NONE;
 }
+
+/*
+when calling fit_pp() from python, this function is called. 
+getting arguments from python and pass it to kmeans_pp
+*/
+static PyObject* fit_capi_pp(PyObject* self, PyObject* args)
+{
+    int k;
+    int dimension_p;
+    int num_of_points_p;
+    PyObject *centroids_locations;
+    PyObject *data_points_p;
+
+    if (!(PyArg_ParseTuple(args, "iiiOO", &k, &dimension_p, 
+                    &num_of_points_p, &centroids_locations, &data_points_p)))
+    {
+        printf("An Error Has Occured");
+        exit(0);
+    }
+    if (!PyList_Check(centroids_locations) || !PyList_Check(data_points_p))
+    {
+        printf("An Error Has Occured");
+        exit(0);
+    }
+    kmeans_pp(k, dimension_p, num_of_points_p, centroids_locations, data_points_p);
+    Py_RETURN_NONE
+
+}
+
 /*
 building spkmeans module...
 */
@@ -64,6 +85,10 @@ static PyMethodDef spkmeansMethods[] = {
      (PyCFunction) fit_capi,
      METH_VARARGS,
      PyDoc_STR("spkmeans algorithem")},
+    {"fit_pp",
+     (PyCFunction) fit_capi_pp,
+     METH_VARARGS,
+     PyDoc_STR("spkmeans algorithem2")},
     {NULL, NULL, 0, NULL}};
 
 static struct PyModuleDef moduledef =
