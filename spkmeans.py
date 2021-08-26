@@ -31,7 +31,7 @@ f1.close
 points = pd.read_csv(input_file, names=["c" + str(i) for i in range(len_f1)])
 points = pd.DataFrame(points)
 
-points_numpy = points.to_numpy() #convert to numpy array
+points_numpy = np.array(points) #convert to numpy array
 
 if(k != 0 and k >= len(points)):
     print("An Error Has Occured")
@@ -53,8 +53,9 @@ data_points_p = spkmeansmodule.fit(k, goal, dimension, data_points_size, data_po
 
 distances = [-1.0 for i in range(len(data_points_p))]
 probabilities = [0.0 for i in range(len(data_points_p))]
+indexes = [0 for i in range(len(data_points_p))]
 
-data_points_numpy = data_points_p.to_numpy() #convert to numpy array
+data_points_numpy = np.array(data_points_numpy) #convert to numpy array
 
 centroids = np.array(
     [[0.0 for i in range(len(data_points_numpy[0]))] for i in range(k)])
@@ -84,7 +85,7 @@ def KMeansPP():
     cnt = 1
     np.random.seed(0)
 
-    random_index = (int)(np.random.choice(data_points_p.index))
+    random_index = (int)(np.random.choice(indexes))
     centroids_locations[0] = random_index
     centroids[0] = np.ndarray.copy(data_points_numpy[random_index])
     Z = 1
@@ -92,7 +93,7 @@ def KMeansPP():
         min_distances(Z)
         probabilities_calc()
         random_index = (int)(np.random.choice(
-            data_points_p.index, p=probabilities))
+            indexes, p=probabilities))
         centroids_locations[cnt] = random_index
         centroids[Z] = np.ndarray.copy(data_points_numpy[random_index])
         Z += 1

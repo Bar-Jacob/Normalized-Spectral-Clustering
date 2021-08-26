@@ -140,7 +140,6 @@ void spk_goal(double** points, int row, int col, int k)
 {
     double** U;
     double** laplacian = normalized_graph_laplacian(points, row, col);
-    int i;
     Eigenvector* eignvectors = jacobi(laplacian, row);
 
     if(k == 0){

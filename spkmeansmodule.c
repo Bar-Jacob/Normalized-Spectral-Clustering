@@ -3,6 +3,7 @@
 static PyObject* fit_capi(PyObject* self, PyObject* args);
 static PyObject* fit_capi_pp(PyObject* self, PyObject* args);
 
+
 /*
 when calling fit() from python, this function is called. 
 getting arguments from python and pass it to the adequate goal function
@@ -32,16 +33,16 @@ static PyObject* fit_capi(PyObject* self, PyObject* args)
     {
     case 1:
         wam_goal(data_points, num_of_points_p, dimension_p);
-        break;
+        exit(0);
     case 2:
         ddg_goal(data_points, num_of_points_p, dimension_p);
-        break;
+        exit(0);
     case 3:
         lnorm_goal(data_points, num_of_points_p, dimension_p);
-        break;
+        exit(0);
     case 4:
         jacobi_goal(data_points, num_of_points_p);
-        break;
+        exit(0);
     case 0:
         return Py_BuildValue("O", 
         spk_goal_python(data_points, num_of_points_p, dimension_p, k));
@@ -73,7 +74,7 @@ static PyObject* fit_capi_pp(PyObject* self, PyObject* args)
         exit(0);
     }
     kmeans_pp(k, dimension_p, num_of_points_p, centroids_locations, data_points_p);
-    Py_RETURN_NONE
+    Py_RETURN_NONE;
 
 }
 

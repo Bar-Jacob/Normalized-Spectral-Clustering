@@ -1,12 +1,7 @@
-#ifndef spkmeans
-#define spkmeans
-#define PY_SSIZE_T_CLEAN
-#include <stdio.h>
-#include <stdlib.h>
-#include <assert.h>
+#ifndef SPKMEANS_H_
+#define SPKMEANS_H_
 #include <math.h>
-#include <Python.h>
-#include "kmeans.c"
+#include "kmeans.h"
 
 typedef struct Eigenvector
 {
@@ -20,7 +15,7 @@ void ddg_goal(double** points, int row, int dimension);
 void lnorm_goal(double** points, int row, int dimension);
 void jacobi_goal(double** sym_matrix, int row);
 void spk_goal(double** points, int row, int col, int k);
-void spk_goal_python(double** points, int row, int col, int k);
+PyObject* spk_goal_python(double** points, int row, int col, int k);
 
 /*jacobi related functions*/
 Eigenvector* jacobi(double** points, int row);
