@@ -60,6 +60,6 @@ void free_memory(double** matrix, int row);
 
 /*module related function*/
 double** convert_python_to_c(PyObject* data_points_p, int dimension_p, int num_of_points_p);
-PyObject* cToPyObject(double** T, int dimension, int num_of_points);
+PyObject* cToPyObject(double** T, int dimension, int num_of_points, int k);
 
 #endif

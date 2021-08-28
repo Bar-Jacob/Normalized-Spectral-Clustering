@@ -59,8 +59,8 @@ static PyObject* fit_capi_pp(PyObject* self, PyObject* args)
     int k;
     int dimension_p;
     int num_of_points_p;
-    PyObject *centroids_locations;
-    PyObject *data_points_p;
+    PyObject* centroids_locations;
+    PyObject* data_points_p;
 
     if (!(PyArg_ParseTuple(args, "iiiOO", &k, &dimension_p, 
                     &num_of_points_p, &centroids_locations, &data_points_p)))
@@ -75,7 +75,6 @@ static PyObject* fit_capi_pp(PyObject* self, PyObject* args)
     }
     kmeans_pp(k, dimension_p, num_of_points_p, centroids_locations, data_points_p);
     Py_RETURN_NONE;
-
 }
 
 /*

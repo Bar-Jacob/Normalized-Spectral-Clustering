@@ -170,7 +170,8 @@ PyObject* spk_goal_python(double** points, int row, int col, int k)
     }
     U = creating_U(eignvectors, k, row);
     renormalizing_U(U, k, row);
-    points_py = cToPyObject(U, k, row);
+    points_py = cToPyObject(U, k, row, k);
+    free_memory(U, row);
     free_memory(points, row);
     return points_py;
 }
@@ -875,14 +876,16 @@ double** convert_python_to_c(PyObject* data_points_p, int dimension, int num_of_
 after finishing running kmeans algorithm we want to return the results to python 
 converting types from C to python
 */
-PyObject* cToPyObject(double** T, int dimension, int num_of_points)
+/****add int k to input**/
+PyObject* cToPyObject(double** T, int dimension, int num_of_points, int k)
 {
     PyObject* points_py;
     int i = 0;
     int j = 0;
     PyObject* value;
 
-    points_py = PyList_New(num_of_points);
+    /***adding another cell for k***/
+    points_py = PyList_New(num_of_points+1);
     for (i = 0; i < num_of_points; i++)
     {
         PyObject* curr_vector;
@@ -897,6 +900,8 @@ PyObject* cToPyObject(double** T, int dimension, int num_of_points)
         */
         PyList_SetItem(points_py, i, curr_vector);
     }
-    free_memory(T, num_of_points);
+    /***getting k as last var***/
+    value = Py_BuildValue("i", k);
+    PyList_SetItem(points_py, num_of_points, value);
     return points_py;
 }

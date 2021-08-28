@@ -49,13 +49,18 @@ for vector in points_numpy:
 
 #using kmeanssp module by calling the fit function
 #goals legend: spk -> 0, wam -> 1, ddg -> 2, lnorm -> 3, jacobi -> 4
-data_points_p = spkmeansmodule.fit(k, goal, dimension, data_points_size, data_points_p)
+data_points_p = spkmeansmodule.fit(k, goal, dimension, \
+    data_points_size, data_points_p)
+
+#extract k and delete the last cell
+k = data_points_p[-1]
+data_points_p.pop(-1)
 
 distances = [-1.0 for i in range(len(data_points_p))]
 probabilities = [0.0 for i in range(len(data_points_p))]
-indexes = [0 for i in range(len(data_points_p))]
+indexes = [i for i in range(len(data_points_p))]
 
-data_points_numpy = np.array(data_points_numpy) #convert to numpy array
+data_points_numpy = np.array(data_points_p) #convert to numpy array
 
 centroids = np.array(
     [[0.0 for i in range(len(data_points_numpy[0]))] for i in range(k)])
@@ -110,7 +115,8 @@ for vector in data_points_numpy:
     for i in range(dimension):
         data_points_p.append(vector[i])
 
+print("before fit_pp")
 #using kmeanssp module by calling the fit function
-np.array(spkmeansmodule.fit_pp(
-    k, dimension, data_points_size, centroids_locations, data_points_p))
+spkmeansmodule.fit_pp(k, dimension, data_points_size, \
+    centroids_locations, data_points_p)
 
