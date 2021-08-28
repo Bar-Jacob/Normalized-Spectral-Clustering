@@ -110,13 +110,13 @@ dimension = len(centroids[0])
 data_points_size = len(data_points_numpy)
 
 # creating a 1D list of the data points to give as an argument to C
-data_points_p = []
+points_p = []
 for vector in data_points_numpy:
     for i in range(dimension):
-        data_points_p.append(vector[i])
+        points_p.append(vector[i])
 
 print("before fit_pp")
 #using kmeanssp module by calling the fit function
 spkmeansmodule.fit_pp(k, dimension, data_points_size, \
-    centroids_locations, data_points_p)
+    centroids_locations, points_p)
 

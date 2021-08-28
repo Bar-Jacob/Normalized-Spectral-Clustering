@@ -56,6 +56,7 @@ getting arguments from python and pass it to kmeans_pp
 */
 static PyObject* fit_capi_pp(PyObject* self, PyObject* args)
 {
+    printf("in pp");
     int k;
     int dimension_p;
     int num_of_points_p;

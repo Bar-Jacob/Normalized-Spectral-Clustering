@@ -39,7 +39,7 @@ void kmeans_pp(int k, int dimension_p, int num_of_points_p,
         assert(clusters[i].centroid != NULL && "An Error Has Occured");
 
         memcpy(clusters[i].centroid, data_points[PyLong_AsLong
-        (PyList_GetItem(centroids_locations, cnt))], 
+        (PyList_GetItem(centroids_locations, i))], 
         sizeof(double) * dimension); /*will be equal to the i'th vector*/
 
         clusters[i].num_of_points = 0;
