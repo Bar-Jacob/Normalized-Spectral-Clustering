@@ -1,32 +1,12 @@
 #include "kmeans.h"
 
 void kmeans_pp(int k, int dimension_p, int num_of_points_p, 
-                PyObject *centroids_locations, PyObject *data_points_p)
+                int* centroids_locations, double** data_points)
 {
     Cluster* clusters;
-    double** data_points;
     int i = 0;
-    int j = 0;
-    int cnt = 0;
     int num_of_points = num_of_points_p;
     int dimension = dimension_p;
-
-    /*
-    converting all data points from python into data points in C
-    */
-    data_points = (double **)calloc(num_of_points, sizeof(*data_points));
-    assert(data_points != NULL && "error in allocating memory");
-
-    for (i = 0; i < num_of_points; i++)
-    {
-        data_points[i] = (double *)calloc(dimension, sizeof(*data_points[i]));
-        assert(data_points[i] != NULL && "error in allocating memory");
-        for (j = 0; j < dimension; j++)
-        {
-            data_points[i][j] = PyFloat_AsDouble(PyList_GetItem(data_points_p, cnt));
-            cnt++;
-        }
-    }
 
     /*
     converting k centroids from python to k centroids in C
@@ -38,8 +18,7 @@ void kmeans_pp(int k, int dimension_p, int num_of_points_p,
         clusters[i].centroid = (double *)calloc(dimension, sizeof(double));
         assert(clusters[i].centroid != NULL && "An Error Has Occured");
 
-        memcpy(clusters[i].centroid, data_points[PyLong_AsLong
-        (PyList_GetItem(centroids_locations, i))], 
+        memcpy(clusters[i].centroid, data_points[centroids_locations[i]], 
         sizeof(double) * dimension); /*will be equal to the i'th vector*/
 
         clusters[i].num_of_points = 0;
@@ -49,7 +28,7 @@ void kmeans_pp(int k, int dimension_p, int num_of_points_p,
     shared_kmeans_algorithm(clusters, data_points, k, dimension, num_of_points);
 }
 
-void kmeans(double** clusters_spk, int k, 
+void kmeans_func(double** clusters_spk, int k, 
                         int dimension, int num_of_points)
 {
     Cluster* clusters;
@@ -105,7 +84,7 @@ void shared_kmeans_algorithm(Cluster* clusters, double** clusters_spk, int k,
         cnt++;
     }
     print_clusters(clusters, dimension, k);
-    free_clusters(clusters, k, num_of_points);
+    free_clusters(clusters, k);
 }
 
 void finding_cluster(double* vector, Cluster* clusters, int k, int dimension){
@@ -157,7 +136,7 @@ double Euclidian_Distance(double* vector1, double* centroid, int dimension){
     return sum;
 }
 
-void free_clusters(Cluster* clusters, int k, int num_of_points){
+void free_clusters(Cluster* clusters, int k){
     int j = 0;
     
     for(j = 0; j < k; j++){

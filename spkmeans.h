@@ -15,12 +15,12 @@ void ddg_goal(double** points, int row, int dimension);
 void lnorm_goal(double** points, int row, int dimension);
 void jacobi_goal(double** sym_matrix, int row);
 void spk_goal(double** points, int row, int col, int k);
-PyObject* spk_goal_python(double** points, int row, int col, int k);
+double** spk_goal_python(double** points, int row, int col, int k);
 
 /*jacobi related functions*/
 Eigenvector* jacobi(double** points, int row);
 double* s_c_t_calculation(double** lp_matrix, int row);
-double** rotation_matrix(double** lp_matrix, int row, double* sct_val);
+double** rotation_matrix(int row, double* sct_val);
 double* largest_off_digonal_value(double** lp_matrix, int row);
 double** jacobi_calculations(double** lp_matrix, int row,
                                         double* sct_vals);
@@ -57,9 +57,6 @@ void print_matrix(double** matrix, int row, int col);
 
 /*free memory function*/
 void free_memory(double** matrix, int row);
-
-/*module related function*/
-double** convert_python_to_c(PyObject* data_points_p, int dimension_p, int num_of_points_p);
-PyObject* cToPyObject(double** T, int dimension, int num_of_points, int k);
+void free_eignvector(Eigenvector* eignvector, int cells);
 
 #endif

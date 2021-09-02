@@ -9,6 +9,9 @@ int main(int argc, char const *argv[])
     int dimension = 1;
     char* token;
     double result;
+    char* str_point;
+    double** data_points_tmp;
+    double** data_points;
     int dimension_cnt = 0;
     int k = atoi(argv[1]);
     char goal = argv[2][0];
@@ -16,10 +19,12 @@ int main(int argc, char const *argv[])
     assert(file != NULL && "An Error Has Occurred");
     /*we have a limit of 10 features, 9 commas,
     and each number has max of 4 digits before decimal point and after it*/
-    char* str_point = (char *)calloc(109, sizeof(char));
+    str_point = (char *)calloc(109, sizeof(char));
     assert(str_point != NULL && "An Error Has Occurred");
-    double** data_points = (double **)calloc(50, sizeof(double *));
-    assert(data_points != NULL && "An Error Has Occurred");
+    data_points_tmp = (double **)calloc(50, sizeof(double *));
+    assert(data_points_tmp != NULL && "An Error Has Occurred");
+    /*in order to compile*/
+    (void) argc;
 
     while (fgets(str_point, 109, file) != NULL)
     {
@@ -38,7 +43,7 @@ int main(int argc, char const *argv[])
             {
                 double* point = (double*)malloc(dimension * sizeof(double));
                 assert(point != NULL && "An Error Has Occurred");
-                data_points[i] = point;
+                data_points_tmp[i] = point;
             }
         }
         token = strtok(str_point, ",");
@@ -47,7 +52,7 @@ int main(int argc, char const *argv[])
         while (token != NULL)
         {
             result = strtod(token, NULL);
-            data_points[num_of_points][dimension_cnt] = result;
+            data_points_tmp[num_of_points][dimension_cnt] = result;
             dimension_cnt++;
             token = strtok(NULL, ",");
         }
@@ -56,7 +61,7 @@ int main(int argc, char const *argv[])
         num_of_points++;
     }
     fclose(file);
-    data_points = (double**)realloc(data_points, (num_of_points) * sizeof(double *));
+    data_points = (double**)realloc(data_points_tmp, (num_of_points) * sizeof(double *));
     assert(data_points != NULL && "An Error Has Occurred");
 
     switch (goal)
@@ -133,7 +138,7 @@ void jacobi_goal(double** sym_matrix, int row)
         free(result[i].vector);
         printf("\n");
     }
-    free(result);
+    free_eignvector(result, row);
 }
 
 void spk_goal(double** points, int row, int col, int k)
@@ -150,16 +155,16 @@ void spk_goal(double** points, int row, int col, int k)
     }
     U = creating_U(eignvectors, k, row);
     renormalizing_U(U, k, row);
-    kmeans(U, k, k, row);
+    kmeans_func(U, k, k, row);
     free_memory(U, row);
     free_memory(points, row);
+    free_eignvector(eignvectors ,row);
 }
 
-PyObject* spk_goal_python(double** points, int row, int col, int k)
+double** spk_goal_python(double** points, int row, int col, int k)
 {
     double** U;
     double** laplacian = normalized_graph_laplacian(points, row, col);
-    PyObject* points_py;
     Eigenvector* eignvectors = jacobi(laplacian, row);
 
     if(k == 0){
@@ -170,10 +175,9 @@ PyObject* spk_goal_python(double** points, int row, int col, int k)
     }
     U = creating_U(eignvectors, k, row);
     renormalizing_U(U, k, row);
-    points_py = cToPyObject(U, k, row, k);
-    free_memory(U, row);
     free_memory(points, row);
-    return points_py;
+    free_eignvector(eignvectors ,row);
+    return U;
 }
 
 /*takes the first k eignvectors (after being sorted by their values)
@@ -328,7 +332,7 @@ Eigenvector* jacobi(double** lp_matrix, int row)
     while (cnt != 100 && converged == 0)
     {
         sct_vals = s_c_t_calculation(lp_matrix, row);
-        rotate_matrix = rotation_matrix(lp_matrix, row, sct_vals);
+        rotate_matrix = rotation_matrix(row, sct_vals);
         lp_matrix_tag = jacobi_calculations(lp_matrix, row, sct_vals);
 
         /*points to the last updated eigenvectors matrix*/
@@ -370,10 +374,12 @@ creating an array of eigenvector structs
 Eigenvector* creating_eigenvector_array(double** eigenvectors_matrix, 
                                     double** eigenvalues_matrix, int row)
 {
-    Eigenvector* result = (Eigenvector*)malloc(row * (sizeof(struct Eigenvector)));
-    assert(result != NULL && "An Error Has Occured");
+    Eigenvector* result;
     int i = 0;
     int m = 0;
+    result = (Eigenvector*)malloc(row * (sizeof(struct Eigenvector)));
+    assert(result != NULL && "An Error Has Occured");
+
     for (i = 0; i < row; i++)
     {
         Eigenvector tmp_struct;
@@ -414,7 +420,7 @@ int eigengap_heuristic(Eigenvector* eigenvector, int row)
 /*
 builds the rotation matrix
 */
-double** rotation_matrix(double** lp_matrix, int row, double* sct_val)
+double** rotation_matrix(int row, double* sct_val)
 {
     double** result = identity_matrix(row, row);
     int i = (int)sct_val[3];
@@ -432,15 +438,26 @@ calculates s, c, t
 */
 double* s_c_t_calculation(double** lp_matrix, int row)
 {
-    double* pivot_arr = largest_off_digonal_value(lp_matrix, row);
-    double* result_arr = (double *)calloc(5, sizeof(double));
-    int i = (int)pivot_arr[1];
-    int j = (int)pivot_arr[2];
-    double pivot_max = pivot_arr[0];
-    double teta = (lp_matrix[j][j] - lp_matrix[i][i]) / (2 * pivot_max);
-    double tmp_calc = fabs(teta) + sqrt(pow(teta, 2) + 1);
+    double* pivot_arr;
+    double* result_arr;
+    int i;
+    int j;
+    double pivot_max;
+    double teta;
+    double tmp_calc;
+    double c;
+    double s;
+    double t;
+
+    pivot_arr = largest_off_digonal_value(lp_matrix, row);
+    result_arr = (double *)calloc(5, sizeof(double));
+    i = (int)pivot_arr[1];
+    j = (int)pivot_arr[2];
+    pivot_max = pivot_arr[0];
+    teta = (lp_matrix[j][j] - lp_matrix[i][i]) / (2 * pivot_max);
+    tmp_calc = fabs(teta) + sqrt(pow(teta, 2) + 1);
     
-    double t = 0.0;
+    t = 0.0;
     if (teta < 0)
     {
         t = -1 / (tmp_calc);
@@ -450,8 +467,8 @@ double* s_c_t_calculation(double** lp_matrix, int row)
         t = 1 / (tmp_calc);
     }
 
-    double c = 1 / (sqrt(pow(t, 2) + 1));
-    double s = c * t;
+    c = 1 / (sqrt(pow(t, 2) + 1));
+    s = c * t;
 
     result_arr[0] = s;
     result_arr[1] = c;
@@ -767,10 +784,23 @@ void free_memory(double** matrix, int row)
     free(matrix);
 }
 
-/*https://www.geeksforgeeks.org/merge-sort/*/
-// Merges two subarrays of arr[].
-// First subarray is arr[l..m]
-// Second subarray is arr[m+1..r]
+/*
+free specifically elements from type Eignvector
+*/
+void free_eignvector(Eigenvector* eignvector, int cells)
+{
+    int i = 0;
+    for (i = 0; i < cells; i++)
+    {
+        free(eignvector[i].vector);
+    }
+    free(eignvector);
+}
+
+/*https://www.geeksforgeeks.org/merge-sort/
+Merges two subarrays of arr[].
+First subarray is arr[l..m]
+Second subarray is arr[m+1..r]*/
 void merge(Eigenvector* eigenvector, Eigenvector* R, Eigenvector* L, int l, int m, int r)
 {
     int i, j, k;
@@ -784,9 +814,9 @@ void merge(Eigenvector* eigenvector, Eigenvector* R, Eigenvector* L, int l, int 
         R[j] = eigenvector[m + 1 + j];
 
     /* Merge the temp arrays back into arr[l..r]*/
-    i = 0; // Initial index of first subarray
-    j = 0; // Initial index of second subarray
-    k = l; // Initial index of merged subarray
+    i = 0; /* Initial index of first subarray*/
+    j = 0; /* Initial index of second subarray*/
+    k = l; /* Initial index of merged subarray*/
     while (i < n1 && j < n2)
     {
         if (L[i].value <= R[j].value)
@@ -825,19 +855,25 @@ void merge(Eigenvector* eigenvector, Eigenvector* R, Eigenvector* L, int l, int 
 sub-array of arr to be sorted */
 void merge_sort(Eigenvector* eigenvector, int l, int r)
 {
+    int m;
+    int n1;
+    int n2;
+    Eigenvector* L;
+    Eigenvector* R;
+
     if (l < r)
     {
-        // Same as (l+r)/2, but avoids overflow for
-        // large l and h
-        int m = l + (r - l) / 2;
-        int n1 = m - l + 1;
-        int n2 = r - m;
+        /* Same as (l+r)/2, but avoids overflow for*/
+        /* large l and h*/
+        m = l + (r - l) / 2;
+        n1 = m - l + 1;
+        n2 = r - m;
 
         /* create temp arrays */
-        Eigenvector* L = (Eigenvector*)malloc(n1 * sizeof(struct Eigenvector));
-        Eigenvector* R = (Eigenvector*)malloc(n2 * sizeof(struct Eigenvector));
+        L = (Eigenvector*)malloc(n1 * sizeof(struct Eigenvector));
+        R = (Eigenvector*)malloc(n2 * sizeof(struct Eigenvector));
 
-        // Sort first and second halves
+        /* Sort first and second halves*/
         merge_sort(eigenvector, l, m);
         merge_sort(eigenvector, m + 1, r);
 
@@ -848,60 +884,3 @@ void merge_sort(Eigenvector* eigenvector, int l, int r)
     }
 }
 
-/*
-converting all data points from python into data points in C
-*/
-double** convert_python_to_c(PyObject* data_points_p, int dimension, int num_of_points)
-{
-    int cnt = 0;
-    int i = 0;
-    int j = 0;
-    double** data_points = (double**)calloc(num_of_points, sizeof(*data_points));
-    assert(data_points != NULL && "An Error Has Occured");
-
-    for (i = 0; i < num_of_points; i++)
-    {
-        data_points[i] = (double *)calloc(dimension, sizeof(*data_points[i]));
-        assert(data_points[i] != NULL && "An Error Has Occured");
-        for (j = 0; j < dimension; j++)
-        {
-            data_points[i][j] = PyFloat_AsDouble(PyList_GetItem(data_points_p, cnt));
-            cnt++;
-        }
-    }
-    return data_points;
-}
-
-/*
-after finishing running kmeans algorithm we want to return the results to python 
-converting types from C to python
-*/
-/****add int k to input**/
-PyObject* cToPyObject(double** T, int dimension, int num_of_points, int k)
-{
-    PyObject* points_py;
-    int i = 0;
-    int j = 0;
-    PyObject* value;
-
-    /***adding another cell for k***/
-    points_py = PyList_New(num_of_points+1);
-    for (i = 0; i < num_of_points; i++)
-    {
-        PyObject* curr_vector;
-        curr_vector = PyList_New(dimension);
-        for (j = 0; j < dimension; j++)
-        {
-            value = Py_BuildValue("d", T[i][j]);
-            PyList_SetItem(curr_vector, j, value);
-        }
-        /*
-        adding the PyObject centroid to the PyList clusters
-        */
-        PyList_SetItem(points_py, i, curr_vector);
-    }
-    /***getting k as last var***/
-    value = Py_BuildValue("i", k);
-    PyList_SetItem(points_py, num_of_points, value);
-    return points_py;
-}

@@ -114,8 +114,7 @@ points_p = []
 for vector in data_points_numpy:
     for i in range(dimension):
         points_p.append(vector[i])
-
-print("before fit_pp")
+        
 #using kmeanssp module by calling the fit function
 spkmeansmodule.fit_pp(k, dimension, data_points_size, \
     centroids_locations, points_p)
