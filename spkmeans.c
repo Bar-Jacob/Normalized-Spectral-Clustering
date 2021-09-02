@@ -21,8 +21,8 @@ int main(int argc, char const *argv[])
     and each number has max of 4 digits before decimal point and after it*/
     str_point = (char *)calloc(109, sizeof(char));
     assert(str_point != NULL && "An Error Has Occurred");
-    data_points_tmp = (double **)calloc(50, sizeof(double *));
-    assert(data_points_tmp != NULL && "An Error Has Occurred");
+    data_points = (double **)calloc(50, sizeof(double *));
+    assert(data_points != NULL && "An Error Has Occurred");
     /*in order to compile*/
     (void) argc;
 
@@ -39,11 +39,10 @@ int main(int argc, char const *argv[])
                 }
             }
             /*memory for the points*/
-            for (i = 0; i < 1000; i++)
+            for (i = 0; i < 50; i++)
             {
-                double* point = (double*)malloc(dimension * sizeof(double));
-                assert(point != NULL && "An Error Has Occurred");
-                data_points_tmp[i] = point;
+                data_points[i] = (double*)malloc(dimension * sizeof(double));
+                assert(data_points[i] != NULL && "An Error Has Occurred");
             }
         }
         token = strtok(str_point, ",");
@@ -52,7 +51,7 @@ int main(int argc, char const *argv[])
         while (token != NULL)
         {
             result = strtod(token, NULL);
-            data_points_tmp[num_of_points][dimension_cnt] = result;
+            data_points[num_of_points][dimension_cnt] = result;
             dimension_cnt++;
             token = strtok(NULL, ",");
         }
@@ -61,8 +60,9 @@ int main(int argc, char const *argv[])
         num_of_points++;
     }
     fclose(file);
-    data_points = (double**)realloc(data_points_tmp, (num_of_points) * sizeof(double *));
-    assert(data_points != NULL && "An Error Has Occurred");
+    data_points_tmp = (double**)realloc(data_points, (num_of_points) * sizeof(double*));
+    assert(data_points_tmp != NULL && "An Error Has Occurred");
+    data_points = data_points_tmp;
 
     switch (goal)
     {
