@@ -50,9 +50,14 @@ static PyObject* fit_capi(PyObject* self, PyObject* args)
         jacobi_goal(data_points, num_of_points_p);
         exit(0);
     case 0:
-        spk_result = spk_goal_python(data_points, num_of_points_p, dimension_p, k);
-        return Py_BuildValue("O", 
-        cToPyObject(spk_result, k, num_of_points_p, k));
+        if (k == 0)
+        {
+            k = (int)spk_goal_python(data_points, num_of_points_p, dimension_p, k, 1)[0][0];
+        }
+        spk_result = spk_goal_python(data_points, num_of_points_p, dimension_p, k, 2);
+        return Py_BuildValue("O",
+                             cToPyObject(spk_result, k, num_of_points_p, k));
+    }
     }
     Py_RETURN_NONE;
 }

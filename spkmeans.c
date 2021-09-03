@@ -168,22 +168,28 @@ void spk_goal(double** points, int row, int col, int k)
     free_eignvector(eignvectors ,row);
 }
 
-double** spk_goal_python(double** points, int row, int col, int k)
+double **spk_goal_python(double **points, int row, int col, 
+                                        int k, int call_number)
 {
-    double** U;
+    double** U = NULL;
+    double** k_array = NULL;
     double** laplacian = normalized_graph_laplacian(points, row, col);
     Eigenvector* eignvectors = jacobi(laplacian, row);
 
-    if(k == 0){
+if (call_number == 1)
+    {
         k = eigengap_heuristic(eignvectors, row);
-    }else{
-        merge_sort(eignvectors, 0, row-1);
-
+        k_array = (double **)calloc(1, sizeof(double *));
+        k_array[0] = (double *)calloc(1, sizeof(double));
+        k_array[0][0] = (double)k;
+        printf("k%lf", k_array[0][0]);
+        return k_array;
     }
+    merge_sort(eignvectors, 0, row - 1);
     U = creating_U(eignvectors, k, row);
     renormalizing_U(U, k, row);
     free_memory(points, row);
-    free_eignvector(eignvectors ,row);
+    free_eignvector(eignvectors, row);
     return U;
 }
 

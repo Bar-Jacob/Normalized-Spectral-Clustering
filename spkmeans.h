@@ -15,7 +15,8 @@ void ddg_goal(double** points, int row, int dimension);
 void lnorm_goal(double** points, int row, int dimension);
 void jacobi_goal(double** sym_matrix, int row);
 void spk_goal(double** points, int row, int col, int k);
-double** spk_goal_python(double** points, int row, int col, int k);
+double **spk_goal_python(double **points, int row, int col, 
+                                        int k, int call_number);
 
 /*jacobi related functions*/
 Eigenvector* jacobi(double** points, int row);
