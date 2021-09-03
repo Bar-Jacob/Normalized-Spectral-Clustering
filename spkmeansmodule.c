@@ -117,9 +117,8 @@ converting a list from python into C array
 */
 int* convert__array_python_to_c(PyObject* array_p, int num_of_cells)
 {
-    int cnt = 0;
     int i = 0;
-    int* result = (double*)calloc(num_of_cells, sizeof(int));
+    int* result = (int*)calloc(num_of_cells, sizeof(int));
     assert(result != NULL && "An Error Has Occured");
 
     for (i = 0; i < num_of_cells; i++)

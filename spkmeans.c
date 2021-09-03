@@ -122,10 +122,18 @@ void jacobi_goal(double** sym_matrix, int row)
     {
         if (i == row - 1)
         {
+            if (result[i].value < 0 && result[i].value > -0.00005)
+            {
+                result[i].value = result[i].value * -1;
+            }
             printf("%.4f", result[i].value);
         }
         else
         {
+            if (result[i].value < 0 && result[i].value > -0.00005)
+            {
+                result[i].value = result[i].value * -1;
+            }
             printf("%.4f,", result[i].value);
         }
 
@@ -135,7 +143,6 @@ void jacobi_goal(double** sym_matrix, int row)
     for (i = 0; i < row; i++)
     {
         print_array(result[i].vector, row);
-        free(result[i].vector);
         printf("\n");
     }
     free_eignvector(result, row);
@@ -727,7 +734,7 @@ void print_matrix(double** matrix, int row, int col)
         {
             if (j == col - 1)
             {
-                if (matrix[i][j] < 0 && matrix[i][j] > -0.00001)
+                if (matrix[i][j] < 0 && matrix[i][j] > -0.00005)
                 {
                     matrix[i][j] = matrix[i][j] * -1;
                 }
@@ -735,7 +742,7 @@ void print_matrix(double** matrix, int row, int col)
             }
             else
             {
-                if (matrix[i][j] < 0 && matrix[i][j] > -0.00004)
+                if (matrix[i][j] < 0 && matrix[i][j] > -0.00005)
                 {
                     matrix[i][j] = matrix[i][j] * -1;
                 }
@@ -753,7 +760,7 @@ void print_array(double* array, int row)
     {
         if (i == row - 1)
         {
-        if (array[i] < 0 && array[i] > -0.00004)
+        if (array[i] < 0 && array[i] > -0.00005)
         {
             array[i] = array[i] * -1;
         }
@@ -761,7 +768,7 @@ void print_array(double* array, int row)
         }
         else
         {
-        if (array[i] < 0 && array[i] > -0.00004)
+        if (array[i] < 0 && array[i] > -0.00005)
         {
             array[i] = array[i] * -1;
         }

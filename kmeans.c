@@ -152,13 +152,13 @@ void print_clusters(Cluster* clusters, int dimension, int k){
     for(i = 0; i < k; i++){
         for(j = 0; j < dimension; j++){
             if(j == dimension-1){
-                if (clusters[i].centroid[j] < 0 && clusters[i].centroid[j] > -0.00001)
+                if (clusters[i].centroid[j] < 0 && clusters[i].centroid[j] > -0.00005)
                 {
                     clusters[i].centroid[j] = clusters[i].centroid[j] * -1;
                 }
                 printf("%.4f", clusters[i].centroid[j]);
             }else{
-                if (clusters[i].centroid[j] < 0 && clusters[i].centroid[j] > -0.00001)
+                if (clusters[i].centroid[j] < 0 && clusters[i].centroid[j] > -0.00005)
                 {
                     clusters[i].centroid[j] = clusters[i].centroid[j] * -1;
                 }
