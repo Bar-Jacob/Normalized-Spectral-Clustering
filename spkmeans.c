@@ -156,10 +156,8 @@ void spk_goal(double** points, int row, int col, int k)
 
     if(k == 0){
         k = eigengap_heuristic(eignvectors, row);
-    }else{
-        merge_sort(eignvectors, 0, row-1);
-
     }
+    merge_sort(eignvectors, 0, row-1);
     U = creating_U(eignvectors, k, row);
     renormalizing_U(U, k, row);
     kmeans_func(U, k, k, row);
@@ -168,6 +166,9 @@ void spk_goal(double** points, int row, int col, int k)
     free_eignvector(eignvectors ,row);
 }
 
+/*we added an argument to indicate whether this is the first call 
+for the function spk_goal_python or the second one. only if k==0 it considers
+the first call and we calculate k. else, we need to calculate U*/
 double **spk_goal_python(double **points, int row, int col, 
                                         int k, int call_number)
 {
@@ -182,7 +183,6 @@ if (call_number == 1)
         k_array = (double **)calloc(1, sizeof(double *));
         k_array[0] = (double *)calloc(1, sizeof(double));
         k_array[0][0] = (double)k;
-        printf("k%lf", k_array[0][0]);
         return k_array;
     }
     merge_sort(eignvectors, 0, row - 1);
