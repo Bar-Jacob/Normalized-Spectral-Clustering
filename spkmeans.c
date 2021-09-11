@@ -10,7 +10,6 @@ int main(int argc, char const *argv[])
     char* token;
     double result;
     char* str_point;
-    double** data_points_tmp;
     double** data_points;
     int dimension_cnt = 0;
     int k = atoi(argv[1]);
@@ -60,10 +59,13 @@ int main(int argc, char const *argv[])
         num_of_points++;
     }
     fclose(file);
-    data_points_tmp = (double**)realloc(data_points, (num_of_points) * sizeof(double*));
-    assert(data_points_tmp != NULL && "An Error Has Occurred");
-    data_points = data_points_tmp;
+    free(str_point);
 
+    for (i = num_of_points; i < 50; i++)
+    {
+        free(data_points[i]);
+    }
+   
     switch (goal)
     {
     case 'w':

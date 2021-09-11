@@ -25,6 +25,7 @@ void kmeans_pp(int k, int dimension, int num_of_points,
     }
     print_locations(centroids_locations, k);
     shared_kmeans_algorithm(clusters, data_points, k, dimension, num_of_points);
+    free(centroids_locations);
 }
 
 void kmeans_func(double** clusters_spk, int k, 
