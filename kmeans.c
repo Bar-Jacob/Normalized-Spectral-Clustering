@@ -1,12 +1,10 @@
 #include "kmeans.h"
 
-void kmeans_pp(int k, int dimension_p, int num_of_points_p, 
+void kmeans_pp(int k, int dimension, int num_of_points, 
                 int* centroids_locations, double** data_points)
 {
     Cluster* clusters;
     int i = 0;
-    int num_of_points = num_of_points_p;
-    int dimension = dimension_p;
 
     /*
     converting k centroids from python to k centroids in C
@@ -25,6 +23,7 @@ void kmeans_pp(int k, int dimension_p, int num_of_points_p,
         clusters[i].sum_of_points = (double *)calloc(dimension, sizeof(double));
         assert(clusters[i].sum_of_points != NULL && "An Error Has Occured");
     }
+    print_locations(centroids_locations, k);
     shared_kmeans_algorithm(clusters, data_points, k, dimension, num_of_points);
 }
 
@@ -165,6 +164,26 @@ void print_clusters(Cluster* clusters, int dimension, int k){
                 printf("%.4f,", clusters[i].centroid[j]);
             }
         }
-        printf("\n");
+        if(i != k - 1){
+            printf("\n");
+        }
     }
+}
+
+/*prints the locations of the chosen centroids*/
+void print_locations(int* array, int num_of_cells)
+{
+    int i = 0;
+    for (i = 0; i < num_of_cells; i++)
+    {
+        if (i == num_of_cells - 1)
+        {
+            printf("%d", array[i]);
+        }
+        else
+        {
+            printf("%d,", array[i]);
+        }
+    }
+    printf("\n");
 }

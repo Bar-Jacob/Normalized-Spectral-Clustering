@@ -755,7 +755,9 @@ void print_matrix(double** matrix, int row, int col)
                 printf("%.4f,", matrix[i][j]);
             }
         }
-        printf("\n");
+        if(i != row - 1){
+            printf("\n");
+        }
     }
 }
 

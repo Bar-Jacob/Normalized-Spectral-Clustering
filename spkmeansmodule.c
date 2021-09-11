@@ -1,6 +1,6 @@
-#include "spkmeans.h"
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
+#include "spkmeans.h"
 
 static PyObject* fit_capi(PyObject* self, PyObject* args);
 static PyObject* fit_capi_pp(PyObject* self, PyObject* args);
